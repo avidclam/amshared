@@ -1,4 +1,4 @@
 amshared
 ========
 
-Miscellaneous Python code shared across projects
+Miscellaneous Python code shared across personal projects.
