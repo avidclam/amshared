@@ -8,7 +8,3 @@ __version__ = '0.1.0'
 __author__ = 'Aleksandr Mikhailov'
 __author_email__ = 'dev@avidclam.com'
 __copyright__ = '2019, Aleksandr Mikhailov'
-
-from .helpers import random_retard, safe_numeric
-
-

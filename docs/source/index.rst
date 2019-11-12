@@ -1,14 +1,13 @@
-amshared |ProjectRelease|
-==========================
+amshared
+========
 
 |ProjectDesc|
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Modules:
 
-   api/modules
-
+   api/helpers
 
 Indices and tables
 ==================

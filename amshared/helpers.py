@@ -1,6 +1,3 @@
-"""
-Tiny useful functions, various topics.
-"""
 import random
 import time
 
@@ -22,7 +19,7 @@ def random_retard(min_=1, max_=10):
 
 
 def safe_numeric(string, default=0):
-    """Converts string to float or int, or returns default.
+    """Converts string to int or float or returns default.
 
     Args:
         string: string to be converted to numeric

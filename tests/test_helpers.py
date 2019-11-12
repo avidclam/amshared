@@ -14,21 +14,21 @@ def test_random_retard():
 
 
 def test_safe_numeric():
-    num = helpers.safe_numeric(3.14)
+    num =helpers.safe_numeric(3.14)
     assert type(num) == float
     assert num == 3.14
-    num = helpers.safe_numeric(3.0)
+    num =helpers.safe_numeric(3.0)
     assert type(num) == int
     assert num == 3
-    num = helpers.safe_numeric('3.14')
+    num =helpers.safe_numeric('3.14')
     assert type(num) == float
     assert num == 3.14
-    num = helpers.safe_numeric('3.00')
+    num =helpers.safe_numeric('3.00')
     assert type(num) == int
     assert num == 3
-    num = helpers.safe_numeric('Number 3.00')
+    num =helpers.safe_numeric('Number 3.00')
     assert type(num) == int
     assert num == 0
-    num = helpers.safe_numeric('Number 3.00', 3)
+    num =helpers.safe_numeric('Number 3.00', 3)
     assert type(num) == int
     assert num == 3

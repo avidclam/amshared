@@ -2,3 +2,4 @@ pip==19.3.1
 pytest==5.2.2
 sphinx==2.2.1
 sphinx-rtd-theme==0.4.3
+livereload==2.6.1
