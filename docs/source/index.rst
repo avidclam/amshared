@@ -9,6 +9,7 @@ amshared
 
    api/helpers
    api/driverpack
+   api/pipes
 
 Indices and tables
 ==================
