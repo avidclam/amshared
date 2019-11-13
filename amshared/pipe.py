@@ -1,5 +1,5 @@
 """
-Pipes is a naive implementation of sequential functions invocation.
+Pipe is a quick-and-dirty implementation of sequential functions invocation.
 
 Functions should be designed the way that a result returned by
 preceding function (pipe argument) could be used as the first argument
@@ -35,31 +35,36 @@ def load(x):
         x: argument to the next function (pipe argument)
 
     Returns:
-        function that performs the required action
+        function that performs the required action in pipe
 
     """
-    return lambda: x
+    return lambda _: x
 
 
-def tee(f):
+def tee(f, *args, **kwargs):
     """When used in pipe, calls argument function for its side effects.
 
-    For exmaple, for logging, but passes pipe argument on.
+    For example, for logging or printing.
+
+    Pipe argument is passed first, before args and kwargs, similar to pipe.call.
+    Resulting value is not used, pipe argument is passed along further instead.
 
     Note:
-        1. Value returned by argument function, if any, is not used.
-        2. Tee'ing a generator is not supported. May precede with ``list``.
+        Tee'ing a generator is not supported. May precede with ``list``.
 
     Args:
         f: function to call
+        *args: other positional arguments to the function
+        **kwargs: keyword arguments to the function
 
     Returns:
-        function that performs the required action
+        function that performs the required action in pipe
 
     """
 
     def g(x):
-        f(x)
+        pargs = (x,) + args
+        f(*pargs, **kwargs)
         return x
 
     return g
@@ -76,7 +81,7 @@ def method(name, *args, **kwargs):
         **kwargs: key arguments to the method
 
     Returns:
-        function that performs the required action
+        function that performs the required action in pipe
 
     """
 
@@ -102,7 +107,7 @@ def tee_method(name, *args, **kwargs):
         **kwargs: key arguments to the method
 
     Returns:
-        function that performs the required action
+        function that performs the required action in pipe
 
     """
 
@@ -115,29 +120,28 @@ def tee_method(name, *args, **kwargs):
     return g
 
 
-def call(f, xarg, *args, **kwargs):
+def call(f, *args, **kwargs):
     """When used in pipe, calls given function.
 
-    Calls given function, passing pipe argument by the name given as ``xarg``
-    along with all other arguments. Resulting value is then used
-    as pipe argument and passed along further.
+    Calls given function, passing pipe argument first, before args and kwargs.
+    Hence function should be (re)designed to handle this.
+    Resulting value is then used as pipe argument and passed along further.
 
     Note:
         kwargs will overwrite pipe argument ``if xarg in kwarg``.
 
     Args:
         f: function to call
-        xarg: name of the function argument to pass pipe argument
-        *args: positional arguments to the function
+        *args: other positional arguments to the function
         **kwargs: keyword arguments to the function
 
     Returns:
+        function that performs the required action in pipe
 
     """
 
     def g(x):
-        kw = {xarg: x}
-        kw.update(**kwargs)
-        return f(*args, **kw)
+        pargs = (x,) + args
+        return f(*pargs, **kwargs)
 
     return g

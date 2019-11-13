@@ -1,16 +1,11 @@
 helpers
 =======
 
-.. automodule:: amshared.helpers
-    :noindex:
+.. currentmodule:: amshared.helpers
 
-    .. rubric:: Featured
-
-    .. autosummary::
-      random_retard
-      safe_numeric
-
-.. rubric:: Members
+.. autosummary::
+  random_retard
+  safe_numeric
 
 .. automodule:: amshared.helpers
     :members:
