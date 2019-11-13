@@ -1,9 +1,10 @@
 """
 DriverPack implements simple explicit dependency injection.
 
-Drivers are callables with keyword arguments.
+Drivers are callables with keyword arguments --- usually classes
+or function-generating functions.
 Each driver is identified by a key.
-Dictionary of key-driver pairs is an iopack of drivers.
+Dictionary of key-driver pairs is pack of drivers.
 
 DriverPack is a factory that instantiates drivers on demand
 using arguments obtained though ``arginject`` method.
@@ -35,14 +36,14 @@ class DriverPack(collections.UserDict):
         super().__init__()
         self.pack = pack
         self.singleton = singleton
-        self.injarg = {}
+        self.injected = {}
 
     @property
     def driverkeys(self):
         return self.pack.keys()
 
     def arginject(self, *_, **kwarg):
-        """Accepts arguments for future use in driver instantiation.
+        """Accepts arguments for future use during driver instantiation.
 
         Args:
             **kwarg: Arguments to be used for driver instantiation.
@@ -51,7 +52,7 @@ class DriverPack(collections.UserDict):
             ``self``, useful for method chaining.
 
         """
-        self.injarg.update(kwarg)
+        self.injected.update(kwarg)
         return self
 
     def argpop(self, argkey):
@@ -64,7 +65,7 @@ class DriverPack(collections.UserDict):
             ``self``, useful for method chaining.
 
         """
-        self.injarg.pop(argkey)
+        self.injected.pop(argkey)
         return self
 
     def instantiate(self, key):
@@ -76,10 +77,10 @@ class DriverPack(collections.UserDict):
         """
         if key not in self.pack:
             return None
-        factory = self.pack[key]
-        sig = inspect.signature(factory)
-        args = {k: v for k, v in self.injarg.items() if k in sig.parameters}
-        return factory(**args)
+        driver = self.pack[key]
+        sig = inspect.signature(driver)
+        args = {k: v for k, v in self.injected.items() if k in sig.parameters}
+        return driver(**args)
 
     def __missing__(self, key):
         inst = self.instantiate(key)

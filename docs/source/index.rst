@@ -8,6 +8,7 @@ amshared
    :caption: Modules:
 
    api/helpers
+   api/driverpack
 
 Indices and tables
 ==================
