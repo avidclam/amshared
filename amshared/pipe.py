@@ -42,7 +42,7 @@ def load(x):
 
 
 def tee(f, *args, **kwargs):
-    """When used in pipe, calls argument function for its side effects.
+    """When used in pipe, calls function but does not use the return value.
 
     For example, for logging or printing.
 
@@ -87,16 +87,13 @@ def method(name, *args, **kwargs):
 
     def g(x):
         f = getattr(x, name, None)
-        if f is callable(f):
-            return f(*args, **kwargs)
-        else:
-            return x
+        return f(*args, **kwargs)
 
     return g
 
 
 def tee_method(name, *args, **kwargs):
-    """When used in pipe, calls stated method for its side effect.
+    """When used in pipe, calls stated method but does not use the return value.
 
     Calls stated method of current pipe argument,
     but passes pipe argument on untouched.
@@ -113,8 +110,7 @@ def tee_method(name, *args, **kwargs):
 
     def g(x):
         f = getattr(x, name, None)
-        if f is not None and callable(f):
-            f(*args, **kwargs)
+        f(*args, **kwargs)
         return x
 
     return g
