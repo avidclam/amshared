@@ -1,0 +1,16 @@
+STAGE_CONTENT = 'content'  # name for content top folder
+STAGE_METADATA = 'metadata'  # name for metadata top folder
+STAGE_HEAP = '__heap__'  # name for folder containing unrelated data parts
+STAGE_WILD = '*'  # wildcard for 'all parts'
+STAGE_RUBRIC_EMPTY = '.'  # directory if rubric metadata is empty
+STAGE_META_SFX = '.meta'  # suffix for files that contain metadata
+STAGE_META_FORMAT = 'json'  # format of metadata files
+# MK = Metadata Key
+MK_PAYLOAD = 'payload'  # if value is False, content is not the data to process
+MK_RUBRIC = 'rubric'
+MK_NAME = 'name'
+MK_PART = 'part'
+MK_FORMAT = 'format'
+MK_SFX = 'suffix'
+MK_CTIME = 'ctime'  # key for write timestamp value
+XTRA_CTIME_FORMAT = "%Y-%m-%d %H:%M:%S +0000"

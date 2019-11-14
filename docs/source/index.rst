@@ -10,6 +10,7 @@ amshared
    api/helpers
    api/driverpack
    api/pipe
+   api/stage
 
 Indices and tables
 ==================
