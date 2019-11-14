@@ -40,7 +40,7 @@ class JsonDriver:
             json.dump(content, file)
 
 
-_default_pack = {
+_default_io_pack = {
     '': PickleDriver,
     'pickle': PickleDriver,
     'txt': TextDriver,
