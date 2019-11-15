@@ -1,5 +1,7 @@
 """
-Stage is a way to serialize data flows, sequences of (metadata, content) tuples.
+Stage is a way to serialize data flows.
+
+Data Flow is a sequence (list, generator) of (metadata, content) tuples.
 
 Metadata is a key-value dictionary with several key names reserved:
 ``rubric``, ``name``, ``part``, `format``, and ``payload``.
@@ -16,4 +18,5 @@ Elements of data flows are logically organized in one of the three forms:
 
 """
 
-from .core import Stage
+from .internals import Rubric
+from .stagecore import Stage

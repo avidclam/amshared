@@ -73,13 +73,11 @@ def test_stage_rubric_folder(tmp_path, dataflow):
     stage_folder = tmp_path / 'stage'
     stg = stage.Stage(stage_folder)
     stg.save(dataflow)
-    atomic_names = stg.lsnames('post/mail', atomic=True)
+    rbc = stg.get_rubric('post/mail')
+    atomic_names = rbc.lsnames(files_only=True)
     assert atomic_names == ['unique']
-    multipart_names = stg.lsnames('post/mail', atomic=False)
+    multipart_names = rbc.lsnames(files_only=False)
     assert multipart_names == ['chain']
-    lhm = stg.last_heap_meta('post/mail')
-    metadata = lhm[0][0]
-    assert metadata['part'] == 3
 
 
 def test_stage_delete(tmp_path, dataflow):
