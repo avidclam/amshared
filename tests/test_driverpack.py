@@ -5,10 +5,10 @@ from amshared.driverpack import DriverPack
 def test_driverpack_singleton(drvpack):
     dp = DriverPack(drvpack, singleton=True)
 
-    dp.inject_kwarg(x=1)
-    dp.inject_kwarg(y=2)
-    dp.inject_kwarg(a='one', b='two')
-    dp.inject_kwarg(z=3, c='three')  # extra
+    dp.inject_kwargs(x=1)
+    dp.inject_kwargs(y=2)
+    dp.inject_kwargs(a='one', b='two')
+    dp.inject_kwargs(z=3, c='three')  # extra
 
     fun_inst = dp['fun']
     assert fun_inst is dp['fun']
@@ -24,10 +24,10 @@ def test_driverpack_singleton(drvpack):
 def test_driverpack_fails(drvpack):
     dp = DriverPack(drvpack, singleton=False)
 
-    dp.inject_kwarg(x=1)
-    dp.inject_kwarg(y=2)
-    dp.inject_kwarg(a='one', b='two')
-    dp.inject_kwarg(z=3, c='three')  # extra
+    dp.inject_kwargs(x=1)
+    dp.inject_kwargs(y=2)
+    dp.inject_kwargs(a='one', b='two')
+    dp.inject_kwargs(z=3, c='three')  # extra
 
     fun_inst = dp['fun']
     assert fun_inst is not dp['fun']

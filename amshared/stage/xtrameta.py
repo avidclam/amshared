@@ -9,11 +9,15 @@ from .constants import MK_CTIME, XTRA_CTIME_FORMAT
 
 
 class XtraMetaBase:
+    def __init__(self):
+        self._xtra_kwargs = {}
+
     def get_metadata(self):
         return {}
 
-    def __call__(self, *args, **kwargs):
-        return self.get_metadata()
+    def __call__(self, *_, **kwargs):
+        self._xtra_kwargs.update(kwargs)
+        return self
 
     @property
     def metadata(self):

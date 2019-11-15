@@ -53,17 +53,17 @@ class DriverPack(collections.UserDict):
     def driver_keys(self):
         return self.pack.keys()
 
-    def inject_kwarg(self, *_, **kwarg):
+    def inject_kwargs(self, *_, **kwargs):
         """Accepts arguments for future use during driver instantiation.
 
         Args:
-            **kwarg: Arguments to be used for driver instantiation.
+            **kwargs: Arguments to be used for driver instantiation.
 
         Returns:
             ``self``, useful for method chaining.
 
         """
-        self.injected.update(kwarg)
+        self.injected.update(kwargs)
         return self
 
     def pop_kwarg(self, argkey):
