@@ -1,6 +1,6 @@
 from datetime import datetime
 from amshared.driverpack import DriverPack
-from amshared.stage import _default_xtrameta_pack
+from amshared.stage.xtrameta import _default_xtrameta_pack
 from amshared.stage.constants import MK_CTIME, XTRA_CTIME_FORMAT
 
 

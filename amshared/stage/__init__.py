@@ -1,12 +1,13 @@
 """
-Stage is a way to serialize data flows (sequences of metadata-content pairs).
+Stage is a way to serialize data flows, sequences of (metadata, content) tuples.
 
-Metadata is a key-value dictionary with some keys required:
-``rubric``, ``name``, ``part``, `format``,and ``payload``.
+Metadata is a key-value dictionary with several key names reserved:
+``rubric``, ``name``, ``part``, `format``, and ``payload``.
 
-Content is useful application data (payload) or miscellaneous information.
+Content is useful application data (payload) or miscellaneous information
+in arbitrary format.
 
-Data flow elements can come in one of the three forms:
+Elements of data flows are logically organized in one of the three forms:
 
 :Atomic: like a filesystem files, element has directory (rubric), name, format,
     and content, one per name
@@ -15,7 +16,4 @@ Data flow elements can come in one of the three forms:
 
 """
 
-from .iodrivers import _default_io_pack
-from .xtrameta import _default_xtrameta_pack
-from .metadata import MetaData
-#from .core import Stage
+from .core import Stage

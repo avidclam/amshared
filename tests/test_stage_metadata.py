@@ -1,4 +1,4 @@
-from amshared.stage import MetaData
+from amshared.stage.metadata import MetaData
 from amshared.stage.constants import (
     STAGE_HEAP, STAGE_WILD, STAGE_RUBRIC_EMPTY,
     MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT, MK_SFX
