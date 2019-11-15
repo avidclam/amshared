@@ -86,10 +86,10 @@ class PairOps:
     @property
     def format_is_supported(self):
         return (MK_FORMAT in self.meta
-                and self.meta[MK_FORMAT] in self.stg.iodp.driverkeys)
+                and self.meta[MK_FORMAT] in self.stg.iodp.driver_keys)
 
     def add_xtrameta(self):
-        for key in self.stg.xtradp.driverkeys:
+        for key in self.stg.xtradp.driver_keys:
             self.meta.update(self.stg.xtradp[key].metadata)
 
     def read_meta(self):

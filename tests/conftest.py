@@ -1,4 +1,5 @@
 import pytest
+from amshared.driverpack import DriverExample
 
 @pytest.fixture()
 def drvpack():
@@ -16,7 +17,8 @@ def drvpack():
         def __call__(self):
             return f"'{self.b}' means {self.y}"
 
-    return {'fun': fun_driver, 'cls': cls_driver}
+    return {'fun': fun_driver, 'cls': cls_driver, 'example': DriverExample}
+
 
 @pytest.fixture()
 def secret():
