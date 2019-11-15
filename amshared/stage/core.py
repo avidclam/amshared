@@ -1,12 +1,13 @@
 import pathlib
+import time
 from ..driverpack import DriverPack
 from ..helpers import safe_numeric
 from .iodrivers import _default_io_pack
-from .xtrameta import _default_xtrameta_pack
 from .metadata import MetaData
 from .constants import (
     STAGE_METADATA, STAGE_CONTENT, STAGE_META_FORMAT, STAGE_WILD, STAGE_HEAP,
-    STAGE_META_SFX, MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT, MK_SFX
+    STAGE_META_SFX, MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT, MK_SFX,
+    MK_CTIME, XTRA_CTIME_FORMAT
 )
 
 
@@ -88,10 +89,6 @@ class PairOps:
         return (MK_FORMAT in self.meta
                 and self.meta[MK_FORMAT] in self.stg.iodp.driver_keys)
 
-    def add_xtrameta(self):
-        for key in self.stg.xtradp.driver_keys:
-            self.meta.update(self.stg.xtradp[key].metadata)
-
     def read_meta(self):
         metadata = self.stg.iodp[STAGE_META_FORMAT].read(self.mfile)
         self.meta = MetaData(metadata)
@@ -107,7 +104,8 @@ class PairOps:
 
     def write(self):
         if self.format_is_supported:
-            self.add_xtrameta()
+            timestamp_string = time.strftime(XTRA_CTIME_FORMAT, time.gmtime())
+            self.meta.update({MK_CTIME: timestamp_string})
             self.mfile.parent.mkdir(parents=True, exist_ok=True)
             self.cfile.parent.mkdir(parents=True, exist_ok=True)
             content_driver = self.stg.iodp[self.meta[MK_FORMAT]]
@@ -180,13 +178,10 @@ class Stage:
 
     """
 
-    def __init__(self, path, io_pack=None, xtrameta_pack=None):
+    def __init__(self, path, io_pack=None):
         if io_pack is None:
             io_pack = _default_io_pack
-        if xtrameta_pack is None:
-            xtrameta_pack = _default_xtrameta_pack
         self.iodp = DriverPack(io_pack)
-        self.xtradp = DriverPack(xtrameta_pack)
         if isinstance(path, pathlib.Path):
             self.topmost = path
         else:

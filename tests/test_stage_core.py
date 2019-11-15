@@ -1,6 +1,8 @@
 import json
 import pickle
+from datetime import datetime
 from amshared import stage
+from amshared.stage.constants import MK_CTIME, XTRA_CTIME_FORMAT
 
 
 def test_stage_init(tmp_path, dataflow):
@@ -16,15 +18,34 @@ def test_stage_save(tmp_path, dataflow):
     stg.save(dataflow)
     level_content = stage_folder / 'content'
     level_metadata = stage_folder / 'metadata'
-    for object in (
+    for stage_object in (
             'post',
             'post/mail',
             'post/mail/__heap__',
             'post/mail/chain',
             'post/parcel'
     ):
-        assert (level_content / object).exists()
-        assert (level_metadata / object).exists()
+        assert (level_content / stage_object).exists()
+        assert (level_metadata / stage_object).exists()
+
+
+def test_stage_meta(tmp_path, dataflow):
+    stage_folder = tmp_path / 'stage'
+    stg = stage.Stage(stage_folder)
+    stg.save(dataflow)
+    meta_path = stage_folder / 'metadata/post/parcel/secret.meta'
+    with open(meta_path, 'r') as file:
+        metadata = json.load(file)
+    # Check timestamp
+    tolerance = 3  # sec
+    date_time = datetime.strptime(metadata[MK_CTIME], XTRA_CTIME_FORMAT)
+    delta = datetime.utcnow() - date_time
+    assert delta.total_seconds() < tolerance
+    # Check other metadata
+    assert metadata['rubric'] == 'post/parcel'
+    assert metadata['name'] == 'secret'
+    assert metadata['format'] == 'pickle'
+    assert 'part' not in metadata
 
 
 def test_stage_content(tmp_path, dataflow):
