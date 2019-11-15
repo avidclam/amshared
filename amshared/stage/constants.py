@@ -11,6 +11,5 @@ MK_RUBRIC = 'rubric'
 MK_NAME = 'name'
 MK_PART = 'part'
 MK_FORMAT = 'format'
-MK_SFX = 'suffix'
 MK_CTIME = 'ctime'  # key for write timestamp value
 XTRA_CTIME_FORMAT = "%Y-%m-%d %H:%M:%S +0000"

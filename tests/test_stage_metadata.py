@@ -1,7 +1,7 @@
 from amshared.stage.metadata import MetaData
 from amshared.stage.constants import (
     STAGE_HEAP, STAGE_WILD, STAGE_RUBRIC_EMPTY,
-    MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT, MK_SFX
+    MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT
 )
 
 def test_stage_metadata_defaults():
@@ -61,12 +61,12 @@ def test_stage_metadata_format_sfx():
     for fmt in ('   ', True, False):
         meta = MetaData({MK_FORMAT: fmt})
         assert meta[MK_FORMAT] == ''
-        assert meta[MK_SFX] == ''
+        assert meta.sfx == ''
     meta = MetaData({MK_FORMAT: 'html'})
     assert meta[MK_FORMAT] == 'html'
-    assert meta[MK_SFX] == '.html'
-    assert MK_SFX not in meta
-    meta[MK_SFX] = '.txt'
-    assert MK_SFX in meta
-    assert meta[MK_SFX] == '.txt'
+    assert meta.sfx == '.html'
+    meta.sfx = '.txt'
+    assert meta.sfx == '.txt'
+    meta.sfx = None
+    assert meta.sfx == '.html'
 

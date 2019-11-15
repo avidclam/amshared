@@ -6,7 +6,7 @@ from .iodrivers import _default_io_pack
 from .metadata import MetaData
 from .constants import (
     STAGE_METADATA, STAGE_CONTENT, STAGE_META_FORMAT, STAGE_WILD, STAGE_HEAP,
-    STAGE_META_SFX, MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT, MK_SFX,
+    STAGE_META_SFX, MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT,
     MK_CTIME, XTRA_CTIME_FORMAT
 )
 
@@ -138,7 +138,7 @@ class AtomicOps(PairOps):
         self.mdir = self.rdir
         self.mfile = self.mdir / f"{self.meta[MK_NAME]}{STAGE_META_SFX}"
         self.cdir = StageFolder(self.stg.topcontent / self.meta[MK_RUBRIC])
-        self.cfile = self.cdir / f"{self.meta[MK_NAME]}{self.meta[MK_SFX]}"
+        self.cfile = self.cdir / f"{self.meta[MK_NAME]}{self.meta.sfx}"
 
 
 class PartOps(PairOps):
@@ -150,7 +150,7 @@ class PartOps(PairOps):
                                 self.meta[MK_NAME])
         if MK_PART in self.meta:
             self.mfile = self.mdir / f"{self.meta[MK_PART]}{STAGE_META_SFX}"
-            self.cfile = self.cdir / f"{self.meta[MK_PART]}{self.meta[MK_SFX]}"
+            self.cfile = self.cdir / f"{self.meta[MK_PART]}{self.meta.sfx}"
 
     def reset_part(self, part):
         self.meta[MK_PART] = part

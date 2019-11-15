@@ -1,7 +1,7 @@
 import collections
 from .constants import (
     STAGE_HEAP, STAGE_WILD, STAGE_RUBRIC_EMPTY,
-    MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT, MK_SFX
+    MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT
 )
 
 
@@ -51,14 +51,23 @@ class MetaData(collections.UserDict):
         super().__init__(data)
         for key in _default_replacements:
             replace_value(self.data, key, *_default_replacements[key])
+        self._sfx = None
 
     def __missing__(self, key):
-        return self.sfx if key == MK_SFX else None
+        # Protect from KeyError
+        return None
 
     @property
     def sfx(self):
         fmt = self.get(MK_FORMAT)
-        return f".{fmt}" if fmt else ''
+        if self._sfx is not None:
+            return self._sfx
+        else:
+            return f".{fmt}" if fmt else ''
+
+    @sfx.setter
+    def sfx(self, value):
+        self._sfx = value
 
     @property
     def is_atomic(self):
