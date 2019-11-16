@@ -3,9 +3,31 @@ from ..driverpack import DriverPack
 from .iodrivers import _default_io_pack
 from .metadata import MetaData
 from .constants import (
-    STAGE_METADATA, STAGE_CONTENT, STAGE_WILD, MK_PAYLOAD, MK_PART
+    STAGE_METADATA, STAGE_CONTENT, STAGE_WILD, STAGE_HEAP, MK_PAYLOAD, MK_PART
 )
-from .internals import AtomicOps, PartOps, Rubric
+from .internals import AtomicOps, PartOps, StageFolder
+
+
+class Rubric:
+    def __init__(self, stg, name):
+        self.stg = stg
+        self.name = name
+        self.folder = StageFolder(self.stg.topmetadata / name)
+
+    @property
+    def atomic_names(self):
+        return self.folder.lsnames(files_only=True)
+
+    @property
+    def multipart_names(self):
+        return self.folder.lsnames(files_only=False)
+
+    def get_name_parts(self, name):
+        return StageFolder(self.folder / name).parts
+
+    @property
+    def heap_parts(self):
+        return self.get_name_parts(STAGE_HEAP)
 
 
 class Stage:

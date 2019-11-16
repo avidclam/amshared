@@ -73,11 +73,10 @@ def test_stage_rubric_folder(tmp_path, dataflow):
     stage_folder = tmp_path / 'stage'
     stg = stage.Stage(stage_folder)
     stg.save(dataflow)
-    rbc = stg.get_rubric('post/mail')
-    atomic_names = rbc.lsnames(files_only=True)
-    assert atomic_names == ['unique']
-    multipart_names = rbc.lsnames(files_only=False)
-    assert multipart_names == ['chain']
+    rbc = stage.Rubric(stg, 'post/mail')
+    # TODO: more tests on Rubric
+    assert rbc.atomic_names == ['unique']
+    assert rbc.multipart_names == ['chain']
 
 
 def test_stage_delete(tmp_path, dataflow):

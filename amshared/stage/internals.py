@@ -54,13 +54,6 @@ class StageFolder:
         return [safe_numeric(stem, 0) for stem in self.lsnames(files_only=True)]
 
 
-class Rubric(StageFolder):
-    def __init__(self, stg, rubric):
-        self.stg = stg
-        self.rubric = rubric
-        super().__init__(self.stg.topmetadata / self.rubric)
-
-
 class PairOps:
     """Pared read/write/delete operations on metadata and content files.
 
@@ -73,7 +66,7 @@ class PairOps:
         self.set_paths()
 
     def set_paths(self):
-        self.rdir = Rubric(self.stg, self.meta[MK_RUBRIC])
+        self.rdir = StageFolder(self.stg.topmetadata / self.meta[MK_RUBRIC])
         self.mdir = None
         self.mfile = None
         self.cdir = None
