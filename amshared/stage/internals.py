@@ -62,7 +62,7 @@ class PairOps:
         self.stg = stg
         self.meta = meta
         self.content = content
-        self.meta_only = content is False
+        self.read_meta_only = content is False
         self.set_paths()
 
     def set_paths(self):
@@ -84,7 +84,7 @@ class PairOps:
 
     def read(self):
         self.read_meta()
-        if not self.meta_only and self.format_is_supported:
+        if not self.read_meta_only and self.format_is_supported:
             content = self.stg.iodp[self.meta[MK_FORMAT]].read(self.cfile)
         else:
             content = None

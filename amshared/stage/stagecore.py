@@ -9,6 +9,8 @@ from .internals import AtomicOps, PartOps, StageFolder
 
 
 class Rubric:
+    """Rubric is an interface to names and parts of objects in a rubric."""
+
     def __init__(self, stg, name):
         self.stg = stg
         self.name = name
@@ -37,6 +39,10 @@ class Stage:
         path: path to the topmost stage folder
         io_pack: instance of DriverPack with classes implementing read/write
             operations for the formats of files storing data flow content
+
+        Operations are load, save and delete.
+        Methods return (or yield, if method's name starts with 'g') metadata of
+        all objects on which operation was performed.
 
     """
 
@@ -75,7 +81,7 @@ class Stage:
                     # not part id or multiple part operations
                     if action == 'write':
                         yield pairops.append()
-                    else:  # TODO: check that this code is tested
+                    else:
                         all_parts = pairops.mdir.parts
                         for part in all_parts:
                             pairops.meta[MK_PART] = part
@@ -101,6 +107,3 @@ class Stage:
 
     def delete(self, dataflow):
         return [*self.gdelete(dataflow)]
-
-    def get_rubric(self, rubric):
-        return Rubric(self, rubric)
