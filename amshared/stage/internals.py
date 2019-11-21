@@ -75,7 +75,7 @@ class PairOps:
     @property
     def format_is_supported(self):
         return (MK_FORMAT in self.meta
-                and self.meta[MK_FORMAT] in self.stg.iodp.driver_keys)
+                and self.meta[MK_FORMAT] in self.stg.iodp.pack)
 
     def read_meta(self):
         metadata = self.stg.iodp[STAGE_META_FORMAT].read(self.mfile)
