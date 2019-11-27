@@ -63,6 +63,7 @@ class DriverPack(collections.UserDict):
             singleton (bool): if True, driver instances are reused
 
     """
+
     def __init__(self, pack, singleton=True, autoinject=False,
                  keys_as_attributes=()):
         super().__init__()
@@ -123,9 +124,12 @@ class DriverPack(collections.UserDict):
                 dynamic_args[arg] = key
             elif param.default is DP_INSTANCE:
                 dynamic_args[arg] = self
-            elif (self._autoinject and
-                  param.default is param.empty and
-                  arg in self.pack):  # ok, try autoinject
+            elif (
+                    self._autoinject and
+                    param.default is param.empty and
+                    arg in self.pack and
+                    not key == arg  # avoid self-dependency
+            ):  # ok, try autoinject
                 dynamic_args[arg] = self.get(arg)  # __missing__ will fire
         return driver(**dynamic_args)
 
