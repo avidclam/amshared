@@ -1,39 +1,39 @@
 import pytest
-from amshared.driverpack import DriverPack
+from amshared.driverpack import DriverPack, DRIVER_KEY, DP_INSTANCE
 
 
 def test_driverpack_singleton(drvpack):
     dp = DriverPack(drvpack, singleton=True, autoinject=False)
 
-    dp.arg_set(x=1)
-    dp.arg_set(y=2)
-    dp.arg_set(a='one', b='two')
-    dp.arg_set(z=3, c='three')  # extra
+    dp.update(x=1)
+    dp.update(y=2)
+    dp.update(a='one', b='two')
+    dp.update(z=3, c='three')  # extra
 
     fun_inst = dp['fun']
     assert fun_inst is dp['fun']
-    dp.arg_pop('x')
+    del dp['x']
     assert ' is ' in dp['fun']()  # 'x' not required: driver instance reused
 
     cls_inst = dp['cls']
     assert cls_inst is dp['cls']
-    dp.arg_pop('y')
+    del dp['y']
     assert ' means ' in dp['cls']()
 
 
 def test_driverpack_fails(drvpack):
     dp = DriverPack(drvpack, singleton=False, autoinject=False)
 
-    dp.arg_set(x=1)
-    dp.arg_set(y=2)
-    dp.arg_set(a='one', b='two')
-    dp.arg_set(z=3, c='three')  # extra
+    dp.update(x=1)
+    dp.update(y=2)
+    dp.update(a='one', b='two')
+    dp.update(z=3, c='three')  # extra
 
     fun_inst = dp['fun']
     assert fun_inst is not dp['fun']
 
     cls_inst = dp['cls']
-    dp.arg_pop('y')
+    del dp['y']
     with pytest.raises(TypeError, match='y'):
         print(dp['cls'])
     assert ' means ' in cls_inst()
@@ -66,5 +66,5 @@ def test_driverpack_autoinject(drvpack):
 
     dp.driver_set(mult=multiplied)
     assert dp['mult'] == 22
-    dp.arg_set(a=0)
+    dp.update(a=0)
     assert dp['mult'] == 0
