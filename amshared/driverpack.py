@@ -34,10 +34,10 @@ as attributes.
 Note:
     Auto-inject feature doesn't work if an item is being accessed as attribute.
 
-When instantiated drivers are deleted with __delitem__, two extra things happen.
-First, also deleted are instances of drivers that have this key in their
-signature (cascade delete). Second, calling ``close`` method is attempted.
-If this functionality is not needed, feel free to ``del dp.data[key]`` instead.
+Calling ``close`` on driver instance is attempted on every ``__delitem__``.
+
+When instantiated drivers are deleted with ``cascade_delete``, also deleted are
+instances of drivers that have this key in their signature.
 
 All instances are deleted (with ``close`` attempted) on ``__exit__``.
 
@@ -138,6 +138,43 @@ class DriverPack(collections.UserDict):
         if self._singleton and inst is not None:
             self.data[key] = inst
         return inst
+
+    def __delitem__(self, key):
+        if key in self.data:
+            try:
+                self.data[key].close()
+            except AttributeError:
+                pass
+            super().__delitem__(key)
+
+    def cascade_delete(self, key):
+        """Removes ``self[key]`` and all keys that have this key as argument.
+
+        Args:
+            key: key to remove
+
+        Returns:
+            self
+
+        """
+        if key in self.data:
+            # remove everyone who depends on me
+            targets = set(self.data.keys()) - {key}
+            targets = targets.intersection(set(self.pack.keys()))
+            for target in targets:
+                sig = inspect.signature(self.pack.get(target))
+                if key in sig.parameters:
+                    self.cascade_delete(target)
+            del self[key]
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        alive = list(self.data.keys())
+        for key in alive:
+            del self[key]
 
 
 class DriverExample:
