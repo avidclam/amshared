@@ -31,13 +31,10 @@ accessed as attributes in ``keys_as_attributes`` parameter.
 If ``keys_as_attributes`` is None, all ``data`` keys will be accessible
 as attributes.
 
-Note:
-    Auto-inject feature doesn't work if an item is being accessed as attribute.
-
 Calling ``close`` on driver instance is attempted on every ``__delitem__``.
 
-When instantiated drivers are deleted with ``cascade_delete``, also deleted are
-instances of drivers that have this key in their signature.
+When instantiated driver is deleted with ``cascade_delete``, also deleted are
+instances of drivers that have given key in their signature.
 
 All instances are deleted (with ``close`` attempted) on ``__exit__``.
 
@@ -74,8 +71,11 @@ class DriverPack(collections.UserDict):
 
     def __getattr__(self, item):
         kaa = self._keys_as_attributes
-        if item in self.data and (kaa is None or item in kaa):
-            return self.data[item]
+        if (
+                (item in self.data or item in self.pack) and
+                (kaa is None or item in kaa)
+        ):
+            return self[item]
         else:
             return None
 
@@ -99,11 +99,10 @@ class DriverPack(collections.UserDict):
             key: driver key
 
         Returns:
-            ``self``, useful for method chaining.
+            popped driver
 
         """
-        self.pack.pop(key)
-        return self
+        return self.pack.pop(key)
 
     def instantiate(self, key):
         """Instantiates driver given its key.
