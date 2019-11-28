@@ -6,12 +6,12 @@ or function-generating functions.
 Each driver is identified by a key.
 Dictionary of key-driver pairs is pack of drivers.
 
-DriverPack is a factory that instantiates drivers on demand using as arguments
-any data assigned with ``update`` or drivers instantiated earlier
+DriverPack is a factory that instantiates drivers on demand using
+any data assigned with ``update`` or drivers instantiated earlier as arguments
 (``singleton`` needs to be True for the latter).
 Only arguments found in a driver's signature are used.
 
-If ``autoinject`` is set, drivers with the same keys as missing arguments
+If ``autoinject`` is set, drivers with the same keys as missing argument names
 are automatically instantiated.
 
 Warning:
@@ -28,15 +28,15 @@ Note:
 
 It is possible to access key values as attributes. List all keys that need to be
 accessed as attributes in ``keys_as_attributes`` parameter.
-If ``keys_as_attributes`` is None, all ``data`` keys will be accessible
-as attributes.
+If ``keys_as_attributes`` is None, all ``data`` or ``pack`` keys will be
+accessible as attributes.
 
 Calling ``close`` on driver instance is attempted on every ``__delitem__``.
 
 When instantiated driver is deleted with ``cascade_delete``, also deleted are
 instances of drivers that have given key in their signature.
 
-All instances are deleted (with ``close`` attempted) on ``__exit__``.
+All instances are deleted on ``__exit__`` (with ``close`` attempted).
 
 """
 
@@ -78,31 +78,6 @@ class DriverPack(collections.UserDict):
             return self[item]
         else:
             return None
-
-    def driver_set(self, *_, **kwargs):
-        """Sets or adds drivers to the pach.
-
-        Args:
-            **kwargs: Keywords and driver classes/ callables.
-
-        Returns:
-            ``self``, useful for method chaining.
-
-        """
-        self.pack.update(kwargs)
-        return self
-
-    def driver_pop(self, key):
-        """Removes driver.
-
-        Args:
-            key: driver key
-
-        Returns:
-            popped driver
-
-        """
-        return self.pack.pop(key)
 
     def instantiate(self, key):
         """Instantiates driver given its key.
@@ -146,6 +121,12 @@ class DriverPack(collections.UserDict):
                 pass
             super().__delitem__(key)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.clear()
+
     def cascade_delete(self, key):
         """Removes ``self[key]`` and all keys that have this key as argument.
 
@@ -166,14 +147,6 @@ class DriverPack(collections.UserDict):
                     self.cascade_delete(target)
             del self[key]
         return self
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        alive = list(self.data.keys())
-        for key in alive:
-            del self[key]
 
 
 class DriverExample:

@@ -30,6 +30,9 @@ class Concealed:
             print(self.content)
         return self.content
 
+    def close(self):
+        delattr(self, 'content')
+
 
 dataflow = (
     # Dataflow is an iterable of (metadata, content) tuples
@@ -49,7 +52,8 @@ dataflow = (
 
 @pytest.fixture()
 def drvpack():
-    return {'fun': fun_driver, 'cls': cls_driver, 'example': DriverExample}
+    return {'fun': fun_driver, 'cls': cls_driver,
+            'example': DriverExample, 'secret': Concealed}
 
 @pytest.fixture()
 def secret():

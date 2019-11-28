@@ -22,6 +22,27 @@ def test_driverpack_singleton(drvpack):
     assert ' means ' in dp['cls']()
 
 
+def test_driverpack_attributes_empty(drvpack):
+    dp = DriverPack(drvpack, singleton=True)
+    dp.update(x=1, y=2)
+    assert dp.x is None
+    assert dp.y is None
+
+
+def test_driverpack_attributes_none(drvpack):
+    dp = DriverPack(drvpack, singleton=True, keys_as_attributes=None)
+    dp.update(x=1, y=2)
+    assert dp.x == 1
+    assert dp.y == 2
+
+
+def test_driverpack_attributes_list(drvpack):
+    dp = DriverPack(drvpack, singleton=True, keys_as_attributes=['x'])
+    dp.update(x=1, y=2)
+    assert dp.x == 1
+    assert dp.y is None
+
+
 def test_driverpack_fails(drvpack):
     dp = DriverPack(drvpack, singleton=False, autoinject=False)
 
@@ -52,20 +73,53 @@ def test_driverpack_example(drvpack):
 def test_driverpack_autoinject(drvpack):
     dp = DriverPack(drvpack, singleton=False, autoinject=True)
 
-    dp.driver_set(x=lambda: 11)
-    dp.driver_set(a=lambda: 'eleven')
+    dp.pack.update(x=lambda: 11)
+    dp.pack.update(a=lambda: 'eleven')
 
     fun_inst = dp['fun']
     assert fun_inst() == "'eleven' is 11"
 
-    dp.driver_pop('a')
+    del dp.pack['a']
     with pytest.raises(TypeError, match='a'):
         fun_inst = dp['fun']
 
     def multiplied(x, a=2):
-        return x*a
+        return x * a
 
-    dp.driver_set(mult=multiplied)
+    dp.pack.update(mult=multiplied)
     assert dp['mult'] == 22
     dp.update(a=0)
     assert dp['mult'] == 0
+
+
+def test_driverpack_cascade(drvpack):
+    dp = DriverPack(drvpack, singleton=True, autoinject=True)
+
+    dp['x'] = 11
+    dp['a'] = 'eleven'
+
+    fun_inst = dp['fun']
+    assert fun_inst() == "'eleven' is 11"
+
+    dp.cascade_delete('a')
+    assert 'x' in dp
+    assert 'fun' not in dp
+
+
+def test_driverpack_close(drvpack):
+    dp = DriverPack(drvpack, singleton=True, autoinject=True)
+
+    dp['content'] = 'Secret'
+    box = dp['secret']
+    assert box.content == 'Secret'
+    del dp['secret']
+    assert hasattr(box, 'reveal') is True
+    assert hasattr(box, 'content') is False
+
+
+def test_driverpack_with(drvpack):
+    with DriverPack(drvpack, singleton=True, autoinject=True) as dp:
+        dp['content'] = 'Secret'
+        box = dp['secret']
+    assert hasattr(box, 'reveal') is True
+    assert hasattr(box, 'content') is False
