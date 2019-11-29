@@ -1,11 +1,9 @@
 import pathlib
-import time
 from ..helpers import safe_numeric
 from .metadata import MetaData
 from .constants import (
     STAGE_META_FORMAT, STAGE_HEAP,
-    STAGE_META_SFX, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT,
-    MK_CTIME, XTRA_CTIME_FORMAT
+    STAGE_META_SFX, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT
 )
 
 
@@ -92,8 +90,6 @@ class PairOps:
 
     def write(self):
         if self.format_is_supported:
-            timestamp_string = time.strftime(XTRA_CTIME_FORMAT, time.gmtime())
-            self.meta.update({MK_CTIME: timestamp_string})
             self.mfile.parent.mkdir(parents=True, exist_ok=True)
             self.cfile.parent.mkdir(parents=True, exist_ok=True)
             content_driver = self.stg.iodp[self.meta[MK_FORMAT]]

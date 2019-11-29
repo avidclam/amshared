@@ -3,7 +3,6 @@ import json
 import pickle
 from datetime import datetime
 from amshared import stage
-from amshared.stage.constants import MK_CTIME, XTRA_CTIME_FORMAT
 
 
 def test_stage_bad_start(tmp_path, dataflow):
@@ -47,11 +46,6 @@ def test_stage_meta(tmp_path, dataflow):
     meta_path = stage_folder_path / 'metadata/post/parcel/secret.meta'
     with open(meta_path, 'r') as file:
         metadata = json.load(file)
-    # Check timestamp
-    tolerance = 3  # sec
-    date_time = datetime.strptime(metadata[MK_CTIME], XTRA_CTIME_FORMAT)
-    delta = datetime.utcnow() - date_time
-    assert delta.total_seconds() < tolerance
     # Check other metadata
     assert metadata['rubric'] == 'post/parcel'
     assert metadata['name'] == 'secret'
