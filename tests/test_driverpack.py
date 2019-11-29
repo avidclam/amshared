@@ -1,6 +1,5 @@
-# TODO: tests for cascade_delete and enter-exit
 import pytest
-from amshared.driverpack import DriverPack, DRIVER_KEY, DP_INSTANCE
+from amshared.driverpack import DriverPack
 
 
 def test_driverpack_singleton(drvpack):
@@ -59,15 +58,6 @@ def test_driverpack_fails(drvpack):
     with pytest.raises(TypeError, match='y'):
         print(dp['cls'])
     assert ' means ' in cls_inst()
-
-
-def test_driverpack_example(drvpack):
-    dp = DriverPack(drvpack, singleton=True, autoinject=False)
-    with dp['example'](additional='Some Value') as driver:
-        assert driver.env['driver_pack'] is dp
-        assert 'example' in driver.env['driver_pack'].pack
-        assert 'example' == driver.env['driver_key']
-        assert 'Some Value' == driver.env['additional']
 
 
 def test_driverpack_autoinject(drvpack):

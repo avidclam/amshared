@@ -1,5 +1,4 @@
 import pytest
-from amshared.driverpack import DriverExample
 
 
 def fun_driver(x, a):
@@ -52,8 +51,7 @@ dataflow = (
 
 @pytest.fixture()
 def drvpack():
-    return {'fun': fun_driver, 'cls': cls_driver,
-            'example': DriverExample, 'secret': Concealed}
+    return {'fun': fun_driver, 'cls': cls_driver, 'secret': Concealed}
 
 @pytest.fixture()
 def secret():

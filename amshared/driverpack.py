@@ -44,14 +44,6 @@ import collections
 import inspect
 
 
-class DRIVER_KEY:
-    """Marker object to be replaced with driver key during instantiation"""
-
-
-class DP_INSTANCE:
-    """Marker object to be replaced with driver pack during instantiation"""
-
-
 class DriverPack(collections.UserDict):
     """Instantiates drivers on demand using pre-injected arguments.
 
@@ -94,10 +86,6 @@ class DriverPack(collections.UserDict):
         for arg, param in sig.parameters.items():
             if arg in self.data:
                 dynamic_args[arg] = self.data[arg]
-            elif param.default is DRIVER_KEY:
-                dynamic_args[arg] = key
-            elif param.default is DP_INSTANCE:
-                dynamic_args[arg] = self
             elif (
                     self._autoinject and
                     param.default is param.empty and
@@ -147,24 +135,3 @@ class DriverPack(collections.UserDict):
                     self.cascade_delete(target)
             del self[key]
         return self
-
-
-class DriverExample:
-    def __init__(self,
-                 driver_pack=DP_INSTANCE,
-                 driver_key=DRIVER_KEY):
-        self._env = {'driver_pack': driver_pack, 'driver_key': driver_key}
-
-    @property
-    def env(self):
-        return self._env
-
-    def __call__(self, **kwargs):
-        self._env.update(kwargs)
-        return self
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
