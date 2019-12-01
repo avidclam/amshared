@@ -105,7 +105,7 @@ class DriverPack(collections.UserDict):
         if key in self.data:
             try:
                 self.data[key].close()
-            except AttributeError:
+            except (AttributeError, TypeError):
                 pass
             super().__delitem__(key)
 
