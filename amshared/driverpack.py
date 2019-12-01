@@ -115,6 +115,9 @@ class DriverPack(collections.UserDict):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.clear()
 
+    def close(self):
+        self.clear()
+
     def cascade_delete(self, key):
         """Removes ``self[key]`` and all keys that have this key as argument.
 
