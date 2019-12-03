@@ -82,36 +82,34 @@ class PairOps:
 
     def read(self):
         self.read_meta()
-        if not self.read_meta_only and self.format_is_supported:
+        if not self.format_is_supported:
+            raise NotImplementedError
+        if not self.read_meta_only:
             content = self.stg.iodp[self.meta[MK_FORMAT]].read(self.cfile)
         else:
             content = None
         return self.meta.data, content
 
     def write(self):
-        if self.format_is_supported:
-            self.mfile.parent.mkdir(parents=True, exist_ok=True)
-            self.cfile.parent.mkdir(parents=True, exist_ok=True)
-            content_driver = self.stg.iodp[self.meta[MK_FORMAT]]
-            content_driver.write(self.content, self.cfile)
-            metadata_driver = self.stg.iodp[STAGE_META_FORMAT]
-            metadata_driver.write(self.meta.data, self.mfile)
-            return self.meta.data, None
-        else:
-            return {}, None
+        if not self.format_is_supported:
+            raise NotImplementedError
+        self.mfile.parent.mkdir(parents=True, exist_ok=True)
+        self.cfile.parent.mkdir(parents=True, exist_ok=True)
+        content_driver = self.stg.iodp[self.meta[MK_FORMAT]]
+        content_driver.write(self.content, self.cfile)
+        metadata_driver = self.stg.iodp[STAGE_META_FORMAT]
+        metadata_driver.write(self.meta.data, self.mfile)
+        return self.meta.data, None
 
     def unlink(self):
         self.read_meta()
-        try:
-            self.mfile.unlink()
-            self.cfile.unlink()
-            report = self.meta.data, None
-        except OSError:
-            report = {}, None
+        self.mfile.unlink()
+        self.cfile.unlink()
+        report = self.meta.data, None  # OSError propagated
         try:
             self.mfile.parent.rmdir()
             self.cfile.parent.rmdir()
-        except OSError:
+        except OSError:  # OSError legitimate here
             pass
         return report
 

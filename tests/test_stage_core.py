@@ -97,6 +97,7 @@ def test_stage_rubric(tmp_path, dataflow):
     stg = stage.Stage(stage_folder_path)
     stg.save(dataflow)
     rbc = stage.Rubric(stg, 'post/mail')
+    assert rbc.exists()
     assert rbc.atomic_names == ['unique']
     assert rbc.multipart_names == ['chain']
     assert sum(rbc.get_name_parts('chain')) == 11
@@ -117,3 +118,26 @@ def test_stage_delete(tmp_path, dataflow):
     assert not meta_path.exists()
     assert not content_path.exists()
     assert not rubric_path.exists()
+
+
+def test_stage_save_exception(tmp_path, dataflow):
+    stage_folder_path = tmp_path / 'stage'
+    stg = stage.Stage(stage_folder_path)
+    badflow = [el for el in dataflow]
+    badflow.append(({'format': 'Non-Existent'}, None))
+    returnflow = stg.save(badflow)
+    goodmetadata = returnflow[0][0]
+    assert goodmetadata['payload'] is True
+    assert 'error' not in goodmetadata
+    badmetadata = returnflow[-1][0]
+    assert badmetadata['payload'] is False
+    assert 'error' in badmetadata
+
+
+def test_stage_load_exception(tmp_path, dataflow):
+    stage_folder_path = tmp_path / 'stage'
+    stg = stage.Stage(stage_folder_path)
+    stg = stage.Stage('stage')
+    badflow = [({'rubric': 'Non-Existent'}, None)]
+    returnflow = stg.load(badflow)  # Silently returns empty dataflow
+    assert returnflow == []  # i.e. no exception raised
