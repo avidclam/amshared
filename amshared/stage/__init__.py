@@ -18,4 +18,4 @@ Elements of data flows are logically organized in one of the three forms:
 
 """
 
-from .stagecore import Stage, Rubric
+from .stagecore import Stage, Rubric, gen_dataflow

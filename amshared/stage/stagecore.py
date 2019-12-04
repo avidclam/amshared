@@ -1,3 +1,4 @@
+from collections.abc import Mapping, Iterable
 import pathlib
 from ..driverpack import DriverPack
 from .iodrivers import _default_io_pack
@@ -7,6 +8,33 @@ from .constants import (
     MK_ERROR
 )
 from .internals import AtomicOps, PartOps, StageFolder
+
+
+def gen_dataflow(x):
+    """Generates dataflow from x, depending on the type of x
+
+    Args:
+        x: any object
+
+    Returns:
+        generator
+
+    """
+    if (
+            isinstance(x, tuple) and
+            len(x) == 2 and
+            isinstance(x[0], Mapping)
+    ):
+        yield x
+    elif isinstance(x, Mapping):
+        yield x, None
+    elif isinstance(x, str):
+        yield {}, x
+    elif isinstance(x, Iterable):
+        for chunk in x:
+            yield from gen_dataflow(chunk)
+    else:
+        yield {}, x
 
 
 def call_method(method, meta):
@@ -88,13 +116,8 @@ class Stage:
         self.topmetadata = self.topmost / STAGE_METADATA
 
     def _dispatch(self, dataflow, action):
-        for chunk in dataflow:
-            if isinstance(chunk, tuple):
-                meta = MetaData(chunk[0])
-                content = chunk[1] if len(chunk) > 1 else None
-            else:
-                meta = MetaData(chunk)
-                content = None
+        for metadata, content in gen_dataflow(dataflow):
+            meta = MetaData(metadata)
             if not meta[MK_PAYLOAD]:
                 continue
             if meta.is_atomic:
