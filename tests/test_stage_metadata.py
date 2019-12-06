@@ -57,6 +57,7 @@ def test_stage_metadata_part():
     assert meta[MK_PART] == STAGE_WILD
     assert meta.is_atomic is False
 
+
 def test_stage_metadata_format_sfx():
     for fmt in ('   ', True, False):
         meta = MetaData({MK_FORMAT: fmt})
