@@ -18,7 +18,7 @@ class NamedLoV:
     In all cases ``data`` member equals
     ``{'ONE': ['1', 'one'], 'TWO': ['2', 'two']}``.
 
-    In addition, in the last case ``other`` member equals
+    In addition, in the last case ``misc`` member equals
     ``{'TWO': {'2': 'numeric', 'two': 'string'}}``.
 
     ``kwargs`` used as split arguments.
@@ -26,7 +26,7 @@ class NamedLoV:
     """
     def __init__(self, source, **kwargs):
         self.data = {}
-        self.other = {}
+        self.misc = {}
         self.sep = kwargs.get('sep', None)
         if isinstance(source, str):
             self.data[source] = []
@@ -55,7 +55,7 @@ class NamedLoV:
                         elif isinstance(lov, Iterable):
                             real_lov = [v for v in lov]
                             if isinstance(lov, Mapping):
-                                self.other[name] = lov
+                                self.misc[name] = lov
                         else:
                             real_lov = []
                         self.data[name] = real_lov
