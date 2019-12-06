@@ -27,7 +27,6 @@ class NamedLoV:
     def __init__(self, source, **kwargs):
         self.data = {}
         self.misc = {}
-        self.sep = kwargs.get('sep', None)
         if isinstance(source, NamedLoV):
             self.data = source.data.copy()
             self.misc = source.misc.copy()
@@ -75,9 +74,7 @@ class NamedLoV:
 
         """
         if 'sep' in kwargs:  # convert LoVs into strings
-            sep = kwargs.get('sep')
-            if not isinstance(sep, str):
-                sep = ' '
+            sep = str(kwargs.get('sep'))
             return [{name: sep.join(lov)} for name, lov in self.data.items()]
         else:
             return [{name: lov} for name, lov in self.data.items()]
