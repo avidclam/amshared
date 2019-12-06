@@ -28,6 +28,10 @@ class NamedLoV:
         self.data = {}
         self.misc = {}
         self.sep = kwargs.get('sep', None)
+        if isinstance(source, NamedLoV):
+            self.data = source.data.copy()
+            self.misc = source.misc.copy()
+            return
         if isinstance(source, str):
             self.data[source] = []
             return
@@ -77,6 +81,17 @@ class NamedLoV:
             return [{name: sep.join(lov)} for name, lov in self.data.items()]
         else:
             return [{name: lov} for name, lov in self.data.items()]
+
+    def __contains__(self, item):
+        return self.data.__contains__(item)
+
+    @property
+    def names(self):
+        return list(self.data.keys())
+
+    @property
+    def values(self):
+        return [v for _, lov in self.data.items() for v in lov]
 
     @property
     def zip(self):
