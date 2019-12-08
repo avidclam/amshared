@@ -2,7 +2,7 @@ from collections.abc import Mapping, Iterable, Sequence
 from .split import split
 
 
-class NamedLoV:
+class TagLoV:
     """Ordered Dictionary of Lists of Values
 
     Initialization takes sources in various forms, e.g.:
@@ -27,7 +27,7 @@ class NamedLoV:
     def __init__(self, source, **kwargs):
         self.data = {}
         self.misc = {}
-        if isinstance(source, NamedLoV):
+        if isinstance(source, TagLoV):
             self.data = source.data.copy()
             self.misc = source.misc.copy()
             return
@@ -63,28 +63,30 @@ class NamedLoV:
                             real_lov = []
                         self.data[name] = real_lov
 
-    def export(self, **kwargs):
+    def export(self, sep=None):
         """Reconstructs canonical form of input.
 
         Args:
-            kwargs: if ``sep`` is given, LoVs are joined into strings
+            sep: ``sep`` is given, LoVs are joined into strings
 
         Returns:
             List of dictionaries of list of values.
 
         """
-        if 'sep' in kwargs:  # convert LoVs into strings
-            sep = str(kwargs.get('sep'))
-            return [{name: sep.join(lov)} for name, lov in self.data.items()]
+        if sep:
+            return [{nm: str(sep).join(lov)} for nm, lov in self.data.items()]
         else:
-            return [{name: lov} for name, lov in self.data.items()]
+            return [{nm: lov} for nm, lov in self.data.items()]
 
     def __contains__(self, item):
         return self.data.__contains__(item)
 
+    def keys(self):
+        return self.data.keys()
+
     @property
-    def names(self):
-        return list(self.data.keys())
+    def lovs(self):
+        return [lov for _, lov in self.data.items()]
 
     @property
     def values(self):
@@ -99,7 +101,7 @@ class NamedLoV:
 
         Examples::
 
-            >>> nlv = NamedLoV({'ONE': ['1', 'one'], 'TWO': ['2', 'two']})
+            >>> nlv = TagLoV({'ONE': ['1', 'one'], 'TWO': ['2', 'two']})
             >>> print(*nlv.zip)
             ('ONE', '1') ('ONE', 'one') ('TWO', '2') ('TWO', 'two')
 

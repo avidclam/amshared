@@ -1,3 +1,3 @@
 from .split import split
-from .namedlov import NamedLoV
-from .which import which_name
+from .taglov import TagLoV
+from .which import which_lov_pd, which_tag
