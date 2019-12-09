@@ -7,4 +7,4 @@ lov
   TagLoV
 
 .. automodule:: amshared.lov
-    :members: TagLoV
+    :members: TagLoV, which_lov, which_tag

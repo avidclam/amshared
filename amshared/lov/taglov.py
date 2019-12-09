@@ -3,7 +3,7 @@ from collections import UserDict
 
 
 class TagLoV(UserDict):
-    """Ordered Dictionary of Lists of Values
+    """Ordered Dictionary of Lists of Values (LoV)
 
     Args:
             source: input in various forms (see below)
@@ -29,19 +29,19 @@ class TagLoV(UserDict):
 
     ``kwargs`` used as split arguments.
 
+    Notes:
+        It's easy to use untagged LoVs, e.g.::
+
+            list_of_lovs = [[1, 2, 3], [10, 100]]
+            taglov = TagLoV(enumerate(list_of_lovs))
+
+
     """
     @staticmethod
     def _split_strip(string, **kwargs):
         return map(str.strip, str.split(string, **kwargs))
 
     def __init__(self, source, to_list=None, **kwargs):
-        """
-
-        Args:
-            source:
-            get_list:
-            **kwargs:
-        """
         super().__init__({})
         self.misc = {}
         self.to_list = self._split_strip if to_list is None else to_list
