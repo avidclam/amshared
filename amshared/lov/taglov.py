@@ -1,9 +1,14 @@
 from collections.abc import Mapping, Iterable, Sequence
-from .split import split
 
 
 class TagLoV:
     """Ordered Dictionary of Lists of Values
+
+    Args:
+            source: input in various forms (see below)
+            to_list: function that converts string (or non-sequences) to lists
+                of values (default: class method _split_strip)
+            **kwargs: keyword arguments to the ``to_list``
 
     Initialization takes sources in various forms, e.g.:
 
@@ -15,7 +20,7 @@ class TagLoV:
         [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]  # requires sep=','
         [{'ONE': ['1', 'one']}, {'TWO': {'2': 'numeric', 'two': 'string'}}]
 
-    In all cases ``data`` member equals
+    In all cases above resulting ``data`` equals
     ``{'ONE': ['1', 'one'], 'TWO': ['2', 'two']}``.
 
     In addition, in the last case ``misc`` member equals
@@ -24,7 +29,19 @@ class TagLoV:
     ``kwargs`` used as split arguments.
 
     """
-    def __init__(self, source, **kwargs):
+    @staticmethod
+    def _split_strip(string, **kwargs):
+        return map(str.strip, str.split(string, **kwargs))
+
+    def __init__(self, source, to_list=None, **kwargs):
+        """
+
+        Args:
+            source:
+            get_list:
+            **kwargs:
+        """
+        self.to_list = self._split_strip if to_list is None else to_list
         self.data = {}
         self.misc = {}
         if isinstance(source, TagLoV):
@@ -54,13 +71,17 @@ class TagLoV:
                 if items is not None:
                     for name, lov in items:
                         if isinstance(lov, str):
-                            real_lov = split(lov, **kwargs)
+                            real_lov = [v for v in self.to_list(lov, **kwargs)]
                         elif isinstance(lov, Iterable):
                             real_lov = [v for v in lov]
                             if isinstance(lov, Mapping):
                                 self.misc[name] = lov
                         else:
-                            real_lov = []
+                            try:
+                                real_lov = [v for v in
+                                            self.to_list(lov, **kwargs)]
+                            except TypeError:
+                                real_lov = []
                         self.data[name] = real_lov
 
     def export(self, sep=None):
@@ -82,19 +103,17 @@ class TagLoV:
         return self.data.__contains__(item)
 
     def keys(self):
+        """All tags in a form of dictionary keys."""
         return self.data.keys()
 
     @property
     def lovs(self):
-        return [lov for _, lov in self.data.items()]
-
-    @property
-    def values(self):
-        return [v for _, lov in self.data.items() for v in lov]
+        """Generator: all Lists-of-Values without tags."""
+        return (lov for _, lov in self.data.items())
 
     @property
     def zip(self):
-        """Generator of (name, value) tuples for all values
+        """Generator of (name, value) tuples for all values.
 
         Returns:
             generator
@@ -107,3 +126,19 @@ class TagLoV:
 
         """
         return ((name, v) for name, lov in self.data.items() for v in lov)
+
+    def map(self, func):
+        """Applies function to each lov using ``misc`` as kwargs if present.
+
+        Args:
+            func: callable to apply to LoVs
+
+        Returns:
+            dictionary of function results with tags as keys
+
+        """
+        mapped = {}
+        for tag, lov in self.data.items():
+            result = func(lov, **self.misc.get(tag, {}))
+            mapped.update({tag: result})
+        return mapped

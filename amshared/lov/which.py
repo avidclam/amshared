@@ -1,7 +1,7 @@
 from typing import Any, Sequence, Callable, Union, Optional
 import pandas as pd
 import numpy as np
-from amshared.string import TagLoV
+from .taglov import TagLoV
 
 
 def equality_matrix(x: np.ndarray, y: np.ndarray):
