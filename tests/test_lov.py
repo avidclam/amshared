@@ -11,6 +11,7 @@ def test_namedlov():
     with pytest.raises(TypeError, match=r"required positional"):
         TagLoV()
     assert TagLoV(x0).data == x0
+    assert TagLoV(x0).taglist == ['ONE', 'TWO']
     assert TagLoV(x0).export() == [{tg: lv} for tg, lv in x0.items()]
     for x in (x1, x2, x3, x4):
         assert TagLoV(x, sep=',').data == x0

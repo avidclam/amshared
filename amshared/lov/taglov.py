@@ -102,9 +102,10 @@ class TagLoV:
     def __contains__(self, item):
         return self.data.__contains__(item)
 
-    def keys(self):
-        """All tags in a form of dictionary keys."""
-        return self.data.keys()
+    @property
+    def taglist(self):
+        """List of all tags."""
+        return list(self.data.keys())
 
     @property
     def lovs(self):
