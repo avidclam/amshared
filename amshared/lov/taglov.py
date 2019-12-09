@@ -1,7 +1,8 @@
 from collections.abc import Mapping, Iterable, Sequence
+from collections import UserDict
 
 
-class TagLoV:
+class TagLoV(UserDict):
     """Ordered Dictionary of Lists of Values
 
     Args:
@@ -41,9 +42,9 @@ class TagLoV:
             get_list:
             **kwargs:
         """
-        self.to_list = self._split_strip if to_list is None else to_list
-        self.data = {}
+        super().__init__({})
         self.misc = {}
+        self.to_list = self._split_strip if to_list is None else to_list
         if isinstance(source, TagLoV):
             self.data = source.data.copy()
             self.misc = source.misc.copy()
@@ -98,9 +99,6 @@ class TagLoV:
             return [{nm: str(sep).join(lov)} for nm, lov in self.data.items()]
         else:
             return [{nm: lov} for nm, lov in self.data.items()]
-
-    def __contains__(self, item):
-        return self.data.__contains__(item)
 
     @property
     def taglist(self):
