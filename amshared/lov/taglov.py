@@ -2,8 +2,8 @@ from collections.abc import Mapping, Iterable, Sequence
 from collections import UserDict
 
 
-class TagLoV(UserDict):
-    """Ordered Dictionary of Lists of Values (LoV)
+class TagLoV:
+    """List of Tagged Lists of Values (LoV), i.e. [(tag, [v0, v1...])]
 
     Args:
             source: input in various forms (see below)
@@ -15,17 +15,19 @@ class TagLoV(UserDict):
 
     .. code-block:: python
 
-        {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
-        (('ONE', ['1', 'one']), ('TWO', ['2', 'two']))
-        (('ONE', '1', 'one'), ('TWO', '2', 'two'))
-        [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]  # requires sep=','
-        [{'ONE': ['1', 'one']}, {'TWO': {'2': 'numeric', 'two': 'string'}}]
+        x0 = [('ONE', ['1', 'one']), ('TWO', ['2', 'two'])]  # canonical form
+        x1 = (('ONE', '1', 'one'), ('TWO', '2', 'two'))
+        x2 = {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
+        x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]  # requires sep=','
+        x4 = [('ONE', ['1', 'one']), ('TWO', {'2': 'numeric', 'two': 'string'})]
+        x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # same tags
+        x6 = 'just string'
 
     In all cases above resulting ``data`` equals
-    ``{'ONE': ['1', 'one'], 'TWO': ['2', 'two']}``.
+    ``[('ONE', ['1', 'one']), ('TWO', ['2', 'two'])]``.
 
     In addition, in the last case ``misc`` member equals
-    ``{'TWO': {'2': 'numeric', 'two': 'string'}}``.
+    ``[None, {'2': 'numeric', 'two': 'string'}]``.
 
     ``kwargs`` used as split arguments.
 
@@ -42,15 +44,16 @@ class TagLoV(UserDict):
         return map(str.strip, str.split(string, **kwargs))
 
     def __init__(self, source, to_list=None, **kwargs):
-        super().__init__({})
-        self.misc = {}
+        self.data = []
+        self.misc = []
         self.to_list = self._split_strip if to_list is None else to_list
         if isinstance(source, TagLoV):
             self.data = source.data.copy()
             self.misc = source.misc.copy()
             return
         if isinstance(source, str):
-            self.data[source] = []
+            self.data.append((source, []))
+            self.misc.append(None)
             return
         if isinstance(source, Mapping):
             source = (source, )
@@ -76,39 +79,41 @@ class TagLoV(UserDict):
                         elif isinstance(lov, Iterable):
                             real_lov = [v for v in lov]
                             if isinstance(lov, Mapping):
-                                self.misc[name] = lov
+                                self.misc.append(lov)
+                            else:
+                                self.misc.append(None)
                         else:
                             try:
                                 real_lov = [v for v in
                                             self.to_list(lov, **kwargs)]
                             except TypeError:
                                 real_lov = []
-                        self.data[name] = real_lov
+                        self.data.append((name, real_lov))
 
-    def export(self, sep=None):
-        """Reconstructs canonical form of input.
+    def __repr__(self):
+        return f"TagLoV({self.canonical})"
 
-        Args:
-            sep: ``sep`` is given, LoVs are joined into strings
-
-        Returns:
-            List of dictionaries of list of values.
-
-        """
-        if sep:
-            return [{nm: str(sep).join(lov)} for nm, lov in self.data.items()]
-        else:
-            return [{nm: lov} for nm, lov in self.data.items()]
+    def __contains__(self, item):
+        return any(item == tag for tag in self.tags)
 
     @property
-    def taglist(self):
-        """List of all tags."""
-        return list(self.data.keys())
+    def canonical(self):
+        """Recreate input data that would initialize equivalent instance"""
+        if self.data:
+            return [(tag, misc if misc else lov)
+                    for (tag, lov), misc in zip(self.data, self.misc)]
+        else:
+            return self.data
+
+    @property
+    def tags(self):
+        """Generator: all tags in order."""
+        return (tag for tag, _ in self.data)
 
     @property
     def lovs(self):
         """Generator: all Lists-of-Values without tags."""
-        return (lov for _, lov in self.data.items())
+        return (lov for _, lov in self.data)
 
     @property
     def zip(self):
@@ -124,7 +129,7 @@ class TagLoV(UserDict):
             ('ONE', '1') ('ONE', 'one') ('TWO', '2') ('TWO', 'two')
 
         """
-        return ((name, v) for name, lov in self.data.items() for v in lov)
+        return ((tag, v) for tag, lov in self.data for v in lov)
 
     def map(self, func):
         """Applies function to each lov using ``misc`` as kwargs if present.
@@ -136,8 +141,11 @@ class TagLoV(UserDict):
             dictionary of function results with tags as keys
 
         """
-        mapped = {}
-        for tag, lov in self.data.items():
-            result = func(lov, **self.misc.get(tag, {}))
-            mapped.update({tag: result})
-        return mapped
+        def _func(tpl):
+            (tag, lov), kw = tpl
+            if not kw:
+                return tag, func(lov)
+            else:
+                return tag, func(lov, **kw)
+
+        return map(_func, zip(self.data, self.misc))

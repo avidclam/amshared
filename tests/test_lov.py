@@ -5,26 +5,29 @@ from amshared.lov import TagLoV, which_lov, which_tag
 
 
 def test_taglov():
-    x0 = {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
-    x1 = (('ONE', ['1', 'one']), ('TWO', ['2', 'two']))
-    x2 = (('ONE', '1', 'one'), ('TWO', '2', 'two'))
+    x0 = [('ONE', ['1', 'one']), ('TWO', ['2', 'two'])]  # canonical form
+    x1 = (('ONE', '1', 'one'), ('TWO', '2', 'two'))
+    x2 = {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
     x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]  # requires sep=','
-    x4 = [{'ONE': ['1', 'one']}, {'TWO': {'2': 'numeric', 'two': 'string'}}]
-    with pytest.raises(TypeError, match=r"required positional"):
-        TagLoV()
+    x4 = [('ONE', ['1', 'one']), ('TWO', {'2': 'numeric', 'two': 'string'})]
+    x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # repeting tags
+    x6 = 'just string'
+
     assert TagLoV(x0).data == x0
-    assert TagLoV(x0).taglist == ['ONE', 'TWO']
-    assert TagLoV(x0).export() == [{tg: lv} for tg, lv in x0.items()]
+    assert list(TagLoV(x0).tags) == ['ONE', 'TWO']
     for x in (x1, x2, x3, x4):
         assert TagLoV(x, sep=',').data == x0
-    tglv = TagLoV(x4)
-    assert tglv.misc == {'TWO': {'2': 'numeric', 'two': 'string'}}
-    assert [lov for lov in tglv.lovs] == [['1', 'one'], ['2', 'two']]
-    nameroll, values = zip(*tglv.zip)
-    assert nameroll == ('ONE', 'ONE', 'TWO', 'TWO')
+    assert TagLoV(x4).canonical == x4
+    assert list(TagLoV(x5).tags) == ['ONE'] * 2
+    assert TagLoV(x6).canonical == [(x6, [])]
+    tl = TagLoV(x4)
+    assert tl.misc == [None, {'2': 'numeric', 'two': 'string'}]
+    assert [lov for lov in tl.lovs] == [['1', 'one'], ['2', 'two']]
+    tagroll, values = zip(*tl.zip)
+    assert tagroll == ('ONE', 'ONE', 'TWO', 'TWO')
     assert values == ('1', 'one', '2', 'two')
-    mapped = tglv.map(lambda x, **kw: f"{kw.get(x[0])}{1000 * int(x[0])}")
-    assert mapped['TWO'] == 'numeric2000'
+    mapped = tl.map(lambda x, **kw: f"{kw.get(x[0])}{1000 * int(x[0])}")
+    assert list(mapped)[1][1] == 'numeric2000'
 
 
 def test_which_zero():
