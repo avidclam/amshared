@@ -84,7 +84,7 @@ def which_tag(series: pd.Series,
     if not isinstance(taglov, TagLoV):
         taglov = TagLoV(taglov)
     lov_idx_plus = which_lov(series, taglov.lovs, method, **kwargs)
-    tags_plus = np.concatenate(([na], taglov.taglist))
+    tags_plus = np.array((na, *taglov.tags))
     result = pd.Series(tags_plus[lov_idx_plus], index=series.index)
     if isinstance(donor, pd.Series):  # take unmatched values from donor
         unmatched_idx = series.index[~lov_idx_plus.astype(bool)]
