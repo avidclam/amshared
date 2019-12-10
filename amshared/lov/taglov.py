@@ -74,14 +74,13 @@ class TagLoV:
                     items = None
                 if items is not None:
                     for name, lov in items:
+                        real_misc = None
                         if isinstance(lov, str):
                             real_lov = [v for v in self.to_list(lov, **kwargs)]
                         elif isinstance(lov, Iterable):
                             real_lov = [v for v in lov]
                             if isinstance(lov, Mapping):
-                                self.misc.append(lov)
-                            else:
-                                self.misc.append(None)
+                                real_misc = lov
                         else:
                             try:
                                 real_lov = [v for v in
@@ -89,6 +88,7 @@ class TagLoV:
                             except TypeError:
                                 real_lov = []
                         self.data.append((name, real_lov))
+                        self.misc.append(real_misc)
 
     def __repr__(self):
         return f"TagLoV({self.canonical})"
