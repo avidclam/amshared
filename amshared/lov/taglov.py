@@ -1,5 +1,4 @@
 from collections.abc import Mapping, Iterable, Sequence
-from collections import UserDict
 
 
 class TagLoV:

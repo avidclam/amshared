@@ -13,6 +13,8 @@ def test_taglov():
     x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # repeting tags
     x6 = 'just string'
 
+    with pytest.raises(TypeError, match=r"positional"):
+        tl = TagLoV()
     assert TagLoV(x0).data == x0
     assert TagLoV(x0).canonical == x0
     assert list(TagLoV(x0).tags) == ['ONE', 'TWO']
