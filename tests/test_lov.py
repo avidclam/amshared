@@ -17,7 +17,9 @@ def test_taglov():
     assert TagLoV(x0).canonical == x0
     assert list(TagLoV(x0).tags) == ['ONE', 'TWO']
     for x in (x1, x2, x3, x4):
-        assert TagLoV(x, sep=',').data == x0
+        tl = TagLoV(x, sep=',')
+        assert tl.data == x0
+        assert len(tl.data) == len(tl.misc)
     assert TagLoV(x4).canonical == x4
     assert list(TagLoV(x5).tags) == ['ONE'] * 2
     assert TagLoV(x6).canonical == [(x6, [])]
