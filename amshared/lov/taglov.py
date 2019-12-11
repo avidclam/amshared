@@ -81,7 +81,7 @@ class TagLoV:
                             try:
                                 real_lov = [v for v in
                                             self.getlist(lov, **kwargs)]
-                            except TypeError:
+                            except (TypeError, AttributeError):
                                 real_lov = []
                         self.data.append((name, real_lov))
 
