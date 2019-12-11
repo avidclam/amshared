@@ -1,14 +1,15 @@
+import string
 from collections.abc import Mapping, Iterable, Sequence
 
 
 class TagLoV:
-    """List of Tagged Lists of Values (LoV), i.e. [(tag, [v0, v1...])]
+    """List of Tagged Lists of Values: [(tag, [v0, v1...]), ...]
 
     Args:
             source: input in various forms (see below)
-            to_list: function that converts string (or non-sequences) to lists
+            getlist: function that converts string (or non-sequences) to lists
                 of values (default: class method _split_strip)
-            **kwargs: keyword arguments to the ``to_list``
+            **kwargs: keyword arguments to the ``getlist``
 
     Initialization takes sources in various forms, e.g.:
 
@@ -17,16 +18,16 @@ class TagLoV:
         x0 = [('ONE', ['1', 'one']), ('TWO', ['2', 'two'])]  # canonical form
         x1 = (('ONE', '1', 'one'), ('TWO', '2', 'two'))
         x2 = {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
-        x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]  # requires sep=','
+        x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]
         x4 = [('ONE', ['1', 'one']), ('TWO', {'2': 'numeric', 'two': 'string'})]
         x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # same tags
-        x6 = 'just string'
 
-    In all cases above resulting ``data`` equals
-    ``[('ONE', ['1', 'one']), ('TWO', ['2', 'two'])]``.
+    In cases x0 -  x3 above .lovs method will show
+    ``(['1', 'one'], ['2', 'two'])``
 
-    In addition, in the last case ``misc`` member equals
-    ``[None, {'2': 'numeric', 'two': 'string'}]``.
+
+    In case x4, ``data`` member equals
+    ``[('ONE', ['1', 'one']), ('TWO', {'2': 'numeric', 'two': 'string'})]``.
 
     ``kwargs`` used as split arguments.
 
@@ -36,23 +37,20 @@ class TagLoV:
             list_of_lovs = [[1, 2, 3], [10, 100]]
             taglov = TagLoV(enumerate(list_of_lovs))
 
-
     """
     @staticmethod
-    def _split_strip(string, **kwargs):
-        return map(str.strip, str.split(string, **kwargs))
+    def _split_strip(s, **kwargs):
+        waste = string.punctuation + string.whitespace
+        return [word.strip(waste) for word in s.split(**kwargs)]
 
-    def __init__(self, source, to_list=None, **kwargs):
+    def __init__(self, source, getlist=None, **kwargs):
         self.data = []
-        self.misc = []
-        self.to_list = self._split_strip if to_list is None else to_list
+        self.getlist = self._split_strip if getlist is None else getlist
         if isinstance(source, TagLoV):
             self.data = source.data.copy()
-            self.misc = source.misc.copy()
             return
         if isinstance(source, str):
             self.data.append((source, []))
-            self.misc.append(None)
             return
         if isinstance(source, Mapping):
             source = (source, )
@@ -73,36 +71,25 @@ class TagLoV:
                     items = None
                 if items is not None:
                     for name, lov in items:
-                        real_misc = None
                         if isinstance(lov, str):
-                            real_lov = [v for v in self.to_list(lov, **kwargs)]
+                            real_lov = [v for v in self.getlist(lov, **kwargs)]
+                        elif isinstance(lov, Mapping):
+                            real_lov = lov
                         elif isinstance(lov, Iterable):
                             real_lov = [v for v in lov]
-                            if isinstance(lov, Mapping):
-                                real_misc = lov
                         else:
                             try:
                                 real_lov = [v for v in
-                                            self.to_list(lov, **kwargs)]
+                                            self.getlist(lov, **kwargs)]
                             except TypeError:
                                 real_lov = []
                         self.data.append((name, real_lov))
-                        self.misc.append(real_misc)
 
     def __repr__(self):
-        return f"TagLoV({self.canonical})"
+        return f"TagLoV({repr(self.data)})"
 
     def __contains__(self, item):
         return any(item == tag for tag in self.tags)
-
-    @property
-    def canonical(self):
-        """Recreate input data that would initialize equivalent instance"""
-        if self.data:
-            return [(tag, misc if misc else lov)
-                    for (tag, lov), misc in zip(self.data, self.misc)]
-        else:
-            return self.data
 
     @property
     def tags(self):
@@ -112,7 +99,7 @@ class TagLoV:
     @property
     def lovs(self):
         """Generator: all Lists-of-Values without tags."""
-        return (lov for _, lov in self.data)
+        return ([v for v in lov] for _, lov in self.data)
 
     @property
     def zip(self):
@@ -130,21 +117,3 @@ class TagLoV:
         """
         return ((tag, v) for tag, lov in self.data for v in lov)
 
-    def map(self, func):
-        """Applies function to each lov using ``misc`` as kwargs if present.
-
-        Args:
-            func: callable to apply to LoVs
-
-        Returns:
-            dictionary of function results with tags as keys
-
-        """
-        def _func(tpl):
-            (tag, lov), kw = tpl
-            if not kw:
-                return tag, func(lov)
-            else:
-                return tag, func(lov, **kw)
-
-        return map(_func, zip(self.data, self.misc))

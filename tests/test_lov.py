@@ -8,7 +8,7 @@ def test_taglov():
     x0 = [('ONE', ['1', 'one']), ('TWO', ['2', 'two'])]  # canonical form
     x1 = (('ONE', '1', 'one'), ('TWO', '2', 'two'))
     x2 = {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
-    x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]  # requires sep=','
+    x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]
     x4 = [('ONE', ['1', 'one']), ('TWO', {'2': 'numeric', 'two': 'string'})]
     x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # repeting tags
     x6 = 'just string'
@@ -16,23 +16,32 @@ def test_taglov():
     with pytest.raises(TypeError, match=r"positional"):
         tl = TagLoV()
     assert TagLoV(x0).data == x0
-    assert TagLoV(x0).canonical == x0
     assert list(TagLoV(x0).tags) == ['ONE', 'TWO']
-    for x in (x1, x2, x3, x4):
-        tl = TagLoV(x, sep=',')
+    for x in (x1, x2, x3):
+        tl = TagLoV(x)
         assert tl.data == x0
-        assert len(tl.data) == len(tl.misc)
-    assert TagLoV(x4).canonical == x4
+    assert TagLoV(x4).data == x4
     assert list(TagLoV(x5).tags) == ['ONE'] * 2
-    assert TagLoV(x6).canonical == [(x6, [])]
+    assert TagLoV(x6).data == [(x6, [])]
     tl = TagLoV(x4)
-    assert tl.misc == [None, {'2': 'numeric', 'two': 'string'}]
     assert [lov for lov in tl.lovs] == [['1', 'one'], ['2', 'two']]
     tagroll, values = zip(*tl.zip)
     assert tagroll == ('ONE', 'ONE', 'TWO', 'TWO')
     assert values == ('1', 'one', '2', 'two')
-    mapped = tl.map(lambda x, **kw: f"{kw.get(x[0])}{1000 * int(x[0])}")
-    assert list(mapped)[1][1] == 'numeric2000'
+
+
+def test_taglov_custom():
+    x7 = [('ONE', 123), ('TWO', 22435)]
+
+    def getlist(x):
+        return list(str(x))
+
+    tl = TagLoV(x7, getlist=getlist)
+    tlr = (
+           "TagLoV([('ONE', ['1', '2', '3']), "
+           "('TWO', ['2', '2', '4', '3', '5'])])"
+    )
+    assert repr(tl) == tlr
 
 
 def test_which_zero():
@@ -64,7 +73,7 @@ def test_which_equal_numeric():
 def test_which_strings():
     taglov = TagLoV([{'1': 'one'},
                      {'20': 'twenty'},
-                     {'?': 'ele, twe'}], sep=',')
+                     {'?': 'ele, twe'}])
     series = pd.Series(['sixty-one', 'twelve', 'twenty', 'twelvety'])
     wt = which_tag(series, taglov, na='-', method=None)
     ref_tag = pd.Series(['-', '-', '20', '-'])
@@ -86,7 +95,7 @@ def test_which_strings():
 def test_which_custom():
     taglov = TagLoV([{'1': 'one'},
                      {'20': 'twenty'},
-                     {'?': 'ele, twe'}], sep=',')
+                     {'?': 'ele, twe'}])
     series = pd.Series(['sixty-one', 'twelve', 'twenty', 'twelvety'])
 
     def match_nlast(x, y, n=1):  # n trailing symbols match
