@@ -117,6 +117,11 @@ class TagLoV:
 
     @property
     def zip(self):
+        """Generator: (tag, lov) tuples."""
+        return ((tag, [*_gen_values(lov)]) for tag, lov in self.data)
+
+    @property
+    def roll(self):
         """Generator of (name, value) tuples for all values.
 
         Returns:
@@ -125,7 +130,7 @@ class TagLoV:
         Examples::
 
             >>> nlv = TagLoV({'ONE': ['1', 'one'], 'TWO': ['2', 'two']})
-            >>> print(*nlv.zip)
+            >>> print(*nlv.roll)
             ('ONE', '1') ('ONE', 'one') ('TWO', '2') ('TWO', 'two')
 
         """

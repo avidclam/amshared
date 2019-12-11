@@ -10,7 +10,7 @@ def test_taglov():
     x2 = {'ONE': ['1', 'one'], 'TWO': ['2', 'two']}
     x3 = [{'ONE': '1, one'}, {'TWO': ['2', 'two']}]
     x4 = [('ONE', ['1', 'one']), ('TWO', {'2': 'numeric', 'two': 'string'})]
-    x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # repeting tags
+    x5 = (('ONE', ['1', 'one']), ('ONE', ['1.1', 'one.one']))  # repeating tags
     x6 = 'just string'
 
     with pytest.raises(TypeError, match=r"positional"):
@@ -25,7 +25,10 @@ def test_taglov():
     assert TagLoV(x6).data == [(x6, [])]
     tl = TagLoV(x4)
     assert [lov for lov in tl.lovs] == [['1', 'one'], ['2', 'two']]
-    tagroll, values = zip(*tl.zip)
+    tags, lovs = zip(*tl.zip)
+    assert tags == ('ONE', 'TWO')
+    assert lovs == (['1', 'one'], ['2', 'two'])
+    tagroll, values = zip(*tl.roll)
     assert tagroll == ('ONE', 'ONE', 'TWO', 'TWO')
     assert values == ('1', 'one', '2', 'two')
 
