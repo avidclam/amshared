@@ -2,6 +2,15 @@ import string
 from collections.abc import Mapping, Iterable, Sequence
 
 
+def _gen_values(lov):
+    for v in lov:
+        if isinstance(v, Mapping):
+            for key in v:
+                yield key
+        else:
+            yield v
+
+
 class TagLoV:
     """List of Tagged Lists of Values: [(tag, [v0, v1...]), ...]
 
@@ -38,6 +47,7 @@ class TagLoV:
             taglov = TagLoV(enumerate(list_of_lovs))
 
     """
+
     @staticmethod
     def _split_strip(s, **kwargs):
         waste = string.punctuation + string.whitespace
@@ -53,20 +63,20 @@ class TagLoV:
             self.data.append((source, []))
             return
         if isinstance(source, Mapping):
-            source = (source, )
+            source = (source,)
         if isinstance(source, Iterable):
             for entry in source:
                 if isinstance(entry, Mapping):
                     items = entry.items()
                 elif isinstance(entry, str):
-                    items = ((entry, []), )
+                    items = ((entry, []),)
                 elif isinstance(entry, Sequence) and len(entry) > 0:
                     if len(entry) == 1:
-                        items = ((entry, []), )
+                        items = ((entry, []),)
                     elif len(entry) == 2:
-                        items = (entry, )
+                        items = (entry,)
                     else:
-                        items = ((entry[0], entry[1:]), )
+                        items = ((entry[0], entry[1:]),)
                 else:
                     items = None
                 if items is not None:
@@ -76,7 +86,11 @@ class TagLoV:
                         elif isinstance(lov, Mapping):
                             real_lov = lov
                         elif isinstance(lov, Iterable):
-                            real_lov = [v for v in lov]
+                            lov_as_list = [v for v in lov]
+                            if any(isinstance(v, Mapping) for v in lov_as_list):
+                                real_lov = lov
+                            else:
+                                real_lov = lov_as_list
                         else:
                             try:
                                 real_lov = [v for v in
@@ -99,7 +113,7 @@ class TagLoV:
     @property
     def lovs(self):
         """Generator: all Lists-of-Values without tags."""
-        return ([v for v in lov] for _, lov in self.data)
+        return ([*_gen_values(lov)] for _, lov in self.data)
 
     @property
     def zip(self):
@@ -115,5 +129,4 @@ class TagLoV:
             ('ONE', '1') ('ONE', 'one') ('TWO', '2') ('TWO', 'two')
 
         """
-        return ((tag, v) for tag, lov in self.data for v in lov)
-
+        return ((tag, v) for tag, lov in self.data for v in _gen_values(lov))

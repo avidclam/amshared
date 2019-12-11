@@ -30,13 +30,20 @@ def test_taglov():
     assert values == ('1', 'one', '2', 'two')
 
 
+def test_taglov_tricky():
+    x7 = [('ONE', ['1', 'one']),
+          {'TWO': [{'2': 'numeric', 'two': 'string'}, {'2': 'again'}, '2 3']}]
+    tl = TagLoV(x7)
+    assert [*tl.lovs][1] == ['2', 'two', '2', '2 3']  # Note: '2 3' not parced
+
+
 def test_taglov_custom():
-    x7 = [('ONE', 123), ('TWO', 22435)]
+    x8 = [('ONE', 123), ('TWO', 22435)]
 
     def getlist(x):
         return list(str(x))
 
-    tl = TagLoV(x7, getlist=getlist)
+    tl = TagLoV(x8, getlist=getlist)
     tlr = (
            "TagLoV([('ONE', ['1', '2', '3']), "
            "('TWO', ['2', '2', '4', '3', '5'])])"
