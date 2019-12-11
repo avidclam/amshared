@@ -2,15 +2,6 @@ import string
 from collections.abc import Mapping, Iterable, Sequence
 
 
-def _gen_values(lov):
-    for v in lov:
-        if isinstance(v, Mapping):
-            for key in v:
-                yield key
-        else:
-            yield v
-
-
 class TagLoV:
     """List of Tagged Lists of Values: [(tag, [v0, v1...]), ...]
 
@@ -47,11 +38,6 @@ class TagLoV:
             taglov = TagLoV(enumerate(list_of_lovs))
 
     """
-
-    @staticmethod
-    def _split_strip(s, **kwargs):
-        waste = string.punctuation + string.whitespace
-        return [word.strip(waste) for word in s.split(**kwargs)]
 
     def __init__(self, source, getlist=None, **kwargs):
         self.data = []
@@ -113,12 +99,12 @@ class TagLoV:
     @property
     def lovs(self):
         """Generator: all Lists-of-Values without tags."""
-        return ([*_gen_values(lov)] for _, lov in self.data)
+        return ([*self._gval(lov)] for _, lov in self.data)
 
     @property
     def zip(self):
         """Generator: (tag, lov) tuples."""
-        return ((tag, [*_gen_values(lov)]) for tag, lov in self.data)
+        return ((tag, [*self._gval(lov)]) for tag, lov in self.data)
 
     @property
     def roll(self):
@@ -134,4 +120,27 @@ class TagLoV:
             ('ONE', '1') ('ONE', 'one') ('TWO', '2') ('TWO', 'two')
 
         """
-        return ((tag, v) for tag, lov in self.data for v in _gen_values(lov))
+        return ((tag, v) for tag, lov in self.data for v in self._gval(lov))
+
+    @staticmethod
+    def _split_strip(string_, **kwargs):
+        sep = kwargs.get('sep', None)
+        if sep is not None:
+            separators = sep
+            if isinstance(separators, str):
+                separators = [separators]
+        else:
+            separators = (',', ';', *string.whitespace)
+        words = [string_]
+        for sep in separators:
+            words = [part for word in words for part in word.split(sep)]
+        return [word for word in words if word]
+
+    @staticmethod
+    def _gval(lov):
+        for v in lov:
+            if isinstance(v, Mapping):
+                for key in v:
+                    yield key
+            else:
+                yield v
