@@ -4,8 +4,8 @@ from ..driverpack import DriverPack
 from .iodrivers import _default_io_pack
 from .metadata import MetaData
 from .constants import (
-    STAGE_METADATA, STAGE_CONTENT, STAGE_WILD, STAGE_HEAP, MK_PAYLOAD, MK_PART,
-    MK_ERROR
+    STAGE_METADATA, STAGE_CONTENT, STAGE_WILD, STAGE_HEAP,
+    MK_PAYLOAD, MK_NAME, MK_PART, MK_ERROR
 )
 from .internals import AtomicOps, PartOps, StageFolder
 
@@ -53,7 +53,7 @@ def call_method(method, meta):
     """
     try:
         return method()
-    except (FileNotFoundError, OSError, NotImplementedError) as e:
+    except (OSError, NotImplementedError) as e:
         ometa = meta.copy()
         ometa[MK_PAYLOAD] = False
         ometa[MK_ERROR] = type(e).__name__
@@ -123,7 +123,14 @@ class Stage:
             if meta.is_atomic:
                 pairops = AtomicOps(self, meta, content)
                 method = getattr(pairops, action)
-                yield call_method(method, meta)
+                if meta[MK_NAME] == STAGE_WILD and action in ('read', 'unlink'):
+                    all_names = pairops.rdir.lsnames(files_only=True)
+                    for name in all_names:
+                        pairops.meta[MK_NAME] = name
+                        pairops.set_paths()
+                        yield call_method(method, pairops.meta)
+                else:
+                    yield call_method(method, meta)  # single content
             else:
                 pairops = PartOps(self, meta, content)
                 method = getattr(pairops, action)

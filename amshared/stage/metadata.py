@@ -49,6 +49,11 @@ class MetaData(collections.UserDict):
     """
     def __init__(self, data):
         super().__init__(data)
+        name = self.data.get(MK_NAME)
+        part = self.data.get(MK_PART)
+        # Allow for wildcard atomic operations
+        if part is False and name is None:
+            self.data[MK_NAME] = STAGE_WILD
         for key in _default_replacements:
             replace_value(self.data, key, *_default_replacements[key])
         self._sfx = None

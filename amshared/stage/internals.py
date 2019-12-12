@@ -109,7 +109,7 @@ class PairOps:
         try:
             self.mfile.parent.rmdir()
             self.cfile.parent.rmdir()
-        except OSError:  # OSError legitimate here
+        except OSError:  # OSError is normal and not propagated
             pass
         return report
 
