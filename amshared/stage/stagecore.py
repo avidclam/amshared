@@ -5,7 +5,7 @@ from .iodrivers import _default_io_pack
 from .metadata import MetaData
 from .constants import (
     STAGE_METADATA, STAGE_CONTENT, STAGE_WILD, STAGE_HEAP,
-    MK_PAYLOAD, MK_NAME, MK_PART, MK_ERROR
+    MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_ERROR
 )
 from .internals import AtomicOps, PartOps, StageFolder
 
@@ -63,10 +63,10 @@ def call_method(method, meta):
 class Rubric:
     """Rubric is an interface to names and parts of objects in a rubric."""
 
-    def __init__(self, stg, name):
+    def __init__(self, stg, rubric):
         self.stg = stg
-        self.name = name
-        self.folder = StageFolder(self.stg.topmetadata / name)
+        self.name = rubric
+        self.folder = StageFolder(self.stg.topmetadata / rubric)
 
     def exists(self):
         return self.folder.path.exists()
@@ -96,7 +96,7 @@ class Stage:
             operations for the formats of files storing data flow content
 
         Operations are load, save and delete.
-        Methods return (or yield, if method's name starts with 'g') metadata of
+        Methods return (or yield, if method's rubric starts with 'g') metadata of
         all objects on which operation was performed.
 
     """
@@ -120,35 +120,48 @@ class Stage:
             meta = MetaData(metadata)
             if not meta[MK_PAYLOAD]:
                 continue
-            if meta.is_atomic:
-                pairops = AtomicOps(self, meta, content)
-                method = getattr(pairops, action)
-                if meta[MK_NAME] == STAGE_WILD and action in ('read', 'unlink'):
-                    all_names = pairops.rdir.lsnames(files_only=True)
-                    for name in all_names:
-                        pairops.meta[MK_NAME] = name
+            if meta[MK_NAME] == STAGE_WILD and action in ('read', 'unlink'):
+                rbc = Rubric(self, meta.get(MK_RUBRIC, ''))
+                if meta.is_atomic:
+                    all_names = rbc.atomic_names
+                else:
+                    all_names = rbc.multipart_names
+                for name in all_names:
+                    meta['name'] = name
+                    yield from self._subdispatch(meta, content, action)
+            else:
+                yield from self._subdispatch(meta, content, action)
+
+    def _subdispatch(self, meta, content, action):
+        if meta.is_atomic:
+            pairops = AtomicOps(self, meta, content)
+            method = getattr(pairops, action)
+            if meta[MK_NAME] == STAGE_WILD and action in ('read', 'unlink'):
+                all_names = pairops.rdir.lsnames(files_only=True)
+                for name in all_names:
+                    pairops.meta[MK_NAME] = name
+                    pairops.set_paths()
+                    yield call_method(method, pairops.meta)
+            else:
+                yield call_method(method, meta)  # single content
+        else:
+            pairops = PartOps(self, meta, content)
+            method = getattr(pairops, action)
+            if MK_PART not in meta or meta[MK_PART] == STAGE_WILD:
+                # not part id or multiple part operations
+                if action == 'write':
+                    yield call_method(pairops.append, pairops.meta)
+                else:
+                    all_parts = pairops.mdir.parts
+                    # if all_parts == []:
+                    # Insert code here if there's a need to return
+                    # meaningful information rather than an empty list.
+                    for part in all_parts:
+                        pairops.meta[MK_PART] = part
                         pairops.set_paths()
                         yield call_method(method, pairops.meta)
-                else:
-                    yield call_method(method, meta)  # single content
             else:
-                pairops = PartOps(self, meta, content)
-                method = getattr(pairops, action)
-                if MK_PART not in meta or meta[MK_PART] == STAGE_WILD:
-                    # not part id or multiple part operations
-                    if action == 'write':
-                        yield call_method(pairops.append, pairops.meta)
-                    else:
-                        all_parts = pairops.mdir.parts
-                        # if all_parts == []:
-                        # Insert code here if there's a need to return
-                        # meaningful information rather than an empty list.
-                        for part in all_parts:
-                            pairops.meta[MK_PART] = part
-                            pairops.set_paths()
-                            yield call_method(method, pairops.meta)
-                else:
-                    yield call_method(method, pairops.meta)  # single part
+                yield call_method(method, pairops.meta)  # single part
 
     def gsave(self, dataflow):
         yield from self._dispatch(dataflow, 'write')
