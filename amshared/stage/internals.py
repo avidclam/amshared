@@ -58,7 +58,7 @@ class PairOps:
     """
     def __init__(self, stg, meta, content):
         self.stg = stg
-        self.meta = meta
+        self.meta = meta.copy()
         self.content = content
         self.read_meta_only = content is False
         self.set_paths()
