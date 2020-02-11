@@ -8,7 +8,7 @@ def fun_driver(x, a):
     return call
 
 
-class cls_driver:
+class ClassDriver:
     def __init__(self, y, b):
         self.y = y
         self.b = b
@@ -49,13 +49,16 @@ dataflow = (
      Concealed())  # atomic
 )
 
+
 @pytest.fixture()
 def drvpack():
-    return {'fun': fun_driver, 'cls': cls_driver, 'secret': Concealed}
+    return {'fun': fun_driver, 'cls': ClassDriver, 'secret': Concealed}
+
 
 @pytest.fixture()
 def secret():
     return Concealed('secret')
+
 
 @pytest.fixture(name='dataflow')
 def dataflow_fixture():

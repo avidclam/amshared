@@ -96,8 +96,8 @@ class Stage:
             operations for the formats of files storing data flow content
 
         Operations are load, save and delete.
-        Methods return (or yield, if method's rubric starts with 'g') metadata of
-        all objects on which operation was performed.
+        Methods return (or yield, if method's rubric starts with 'g') metadata
+        of all objects on which operation was performed.
 
     """
 
@@ -180,3 +180,27 @@ class Stage:
 
     def delete(self, dataflow):
         return [*self.gdelete(dataflow)]
+
+    def payload(self, metadata, joiner=None):
+        """Loads and returns all content for a particular metadata.
+
+        Multipart content is joined with ``joiner`` if appropriate.
+
+        Args:
+            metadata: dictionary of metadata (rubric, name, format, etc.)
+            joiner: function to join multipart content into one value,
+                should be able to handle generator
+
+        Returns:
+            list of content
+        """
+        if callable(joiner):
+            return joiner(content for _, content in self.gload(metadata))
+        else:
+            all_content = [content for _, content in self.gload(metadata)]
+            if not all_content:
+                return None
+            elif len(all_content) == 1:
+                return all_content[0]
+            else:
+                return all_content
