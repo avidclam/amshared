@@ -4,6 +4,7 @@ from amshared.stage.constants import (
     MK_PAYLOAD, MK_RUBRIC, MK_NAME, MK_PART, MK_FORMAT
 )
 
+
 def test_stage_metadata_defaults():
     meta = MetaData({})
     assert meta[MK_PAYLOAD] is True
@@ -32,6 +33,7 @@ def test_stage_metadata_rubric():
     meta = MetaData({MK_RUBRIC: 'main'})
     assert meta[MK_RUBRIC] == 'main'
 
+
 def test_stage_metadata_name():
     meta = MetaData({})
     assert meta[MK_NAME] == STAGE_HEAP
@@ -42,6 +44,7 @@ def test_stage_metadata_name():
     meta = MetaData({MK_NAME: 0})
     assert meta[MK_NAME] == 0
     assert meta.is_atomic is True
+
 
 def test_stage_metadata_part():
     meta = MetaData({MK_PART: ''})
@@ -70,4 +73,3 @@ def test_stage_metadata_format_sfx():
     assert meta.sfx == '.txt'
     meta.sfx = None
     assert meta.sfx == '.html'
-
