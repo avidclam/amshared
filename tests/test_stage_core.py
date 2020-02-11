@@ -92,6 +92,20 @@ def test_stage_load(tmp_path, dataflow):
         assert 'message' in content
 
 
+def test_stage_payload(tmp_path, dataflow):
+    stage_folder_path = Path(tmp_path / 'stage')
+    stg = stage.Stage(stage_folder_path)
+    stg.save(dataflow)
+    request = {'rubric': 'post/mail'}
+    assert stg.payload(request) == ['From US', 'From Canada', 'From Russia']
+    assert (
+            stg.payload(request, joiner=lambda x: '|'.join(x)) ==
+            'From US|From Canada|From Russia'
+    )
+    request = {'rubric': 'post/mail', 'name': 'unique'}
+    assert stg.payload(request) == 'From Mars'
+
+
 def test_stage_rubric(tmp_path, dataflow):
     stage_folder_path = Path(tmp_path / 'stage')
     stg = stage.Stage(stage_folder_path)
