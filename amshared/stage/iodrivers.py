@@ -31,13 +31,13 @@ class PickleDriver:
 
 class JsonDriver:
     def read(self, path):
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf-8') as file:
             content = json.load(file)
         return content
 
     def write(self, content, path):
-        with open(path, 'w') as file:
-            json.dump(content, file)
+        with open(path, 'w', encoding='utf-8') as file:
+            json.dump(content, file, ensure_ascii=False)
 
 
 _default_io_pack = {
