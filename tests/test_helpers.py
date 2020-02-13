@@ -32,3 +32,10 @@ def test_safe_numeric():
     num =helpers.safe_numeric('Number 3.00', 3)
     assert type(num) == int
     assert num == 3
+
+
+def test_str_hash():
+    assert helpers.str_hash(None) is None
+    assert helpers.str_hash('', digest_size=4) == '36e9d246'
+    hexdigest = '55325fbe32d9caea12191d7bc3f48229'
+    assert helpers.str_hash('String', digest_size=16) == hexdigest

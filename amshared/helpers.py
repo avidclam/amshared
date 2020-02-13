@@ -1,5 +1,6 @@
 import random
 import time
+from hashlib import blake2s
 
 
 def random_retard(min_=1, max_=10):
@@ -37,3 +38,19 @@ def safe_numeric(string, default=0):
             return n
     except (ValueError, TypeError):
         return default
+
+
+def str_hash(s, digest_size=16):
+    """Generates hash out of a string.
+
+    Args:
+        s: string to find hash for
+        digest_size: size of output digest in bytes
+
+    Returns:
+        hash hex digest string
+    """
+    try:
+        return blake2s(s.encode('utf-8'), digest_size=digest_size).hexdigest()
+    except AttributeError:
+        return None
