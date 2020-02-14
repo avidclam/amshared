@@ -1,6 +1,7 @@
 import random
 import time
 from hashlib import blake2s
+from .islike import is_iter
 
 
 def random_retard(min_=1, max_=10):
@@ -54,3 +55,37 @@ def str_hash(s, digest_size=16):
         return blake2s(s.encode('utf-8'), digest_size=digest_size).hexdigest()
     except AttributeError:
         return None
+
+
+def iter_equal(x, y):
+    """Checks if two iterables are of the same size and equal element-wise.
+
+    If arguments are not iterable, performs regular equality check.
+
+    Be careful as comparison will exhaust generators!
+
+    Args:
+        x: iterable
+        y: iterable
+
+    Returns:
+        boolean
+    """
+    match = True
+    if is_iter(x) and is_iter(y):
+        yg = (yi for yi in y)
+        for xi in x:
+            try:
+                yi = next(yg)
+                match = match and xi == yi
+            except StopIteration:  # y is shorter than x
+                match = False
+        if match:  # check if y is no longer than x
+            try:
+                yi = next(yg)
+                match = False  # successful 'next' means y is longer than x
+            except StopIteration:
+                pass  # match proved
+    else:
+        match = x == y
+    return match

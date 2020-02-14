@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 
 def fun_driver(x, a):
@@ -63,3 +64,15 @@ def secret():
 @pytest.fixture(name='dataflow')
 def dataflow_fixture():
     return dataflow
+
+
+json_samples = (
+    None, False, -1, -.5, np.int64(-1), np.uint(10), np.pi, '',
+    (None,), {}, [],
+    np.array((-1, 0, .5), dtype=np.float), np.array(('a', 'b', 'c'))
+)
+
+
+@pytest.fixture(name='json_samples')
+def json_samples_fixture():
+    return json_samples
